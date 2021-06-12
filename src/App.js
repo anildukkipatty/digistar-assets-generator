@@ -10,6 +10,8 @@ function App() {
   let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, setOutput] = useState('');
+  let [outputImages, setOutputImages] = useState([]);
+  let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
   let folderNames = [
     'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
   ]
@@ -82,12 +84,18 @@ function App() {
       files: finalOutput
     });
     fs.writeFileSync('./composer.json', res);
+    setNoOfImagesGenerated(finalOutput.length)
     setShowWIP(true);
     const python = spawn("python3", ["./compose.py"]);
 
     python.stdout.on("data", data => {
         console.log(`stdout: ${data}`);
         setOutput((x) => `${x} \n ${data.toString()}`);
+        try {
+          setOutputImages(oldArr => [...oldArr, `data:image/jpeg;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+        } catch (error) {
+          console.log('Error loading output file: ', data.toString());
+        }
     });
 
     python.stderr.on("data", data => {
@@ -146,10 +154,22 @@ function App() {
       })}
     </div>
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
-      <pre>
-        {output}
-      </pre>
-    </div>
+      <p>No of images to be generated: {noOfImagesdGenerated}</p>
+      <div>
+        <pre>
+          {output}
+        </pre>
+      </div>
+      <div style={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
+        {outputImages.map((obj, i) => {
+          return (
+            <div key={i} style={{...imgStyleDiv}}>
+              <img style={imgStyle} alt="" src={obj} />
+            </div>
+          )
+        })}
+      </div>
+      </div>
     </>
   );
 }

@@ -23,7 +23,7 @@ function createWindow() {
 
     // and load the index.html of the app.
     // const startUrl = process.env.ELECTRON_START_URL || url.format({
-    const startUrl = 'http://localhost:3000' || url.format({
+    const startUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : url.format({
             pathname: path.join(__dirname, '/../build/index.html'),
             protocol: 'file:',
             slashes: true
@@ -31,7 +31,9 @@ function createWindow() {
     mainWindow.loadURL(startUrl, {});
     mainWindow.electron = electron;
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.webContents.openDevTools();
+    }
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {

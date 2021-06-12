@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import sys
 from helper import *
 
 image_size = (2140, 2140)
@@ -12,7 +13,8 @@ def generated_images_from_file(json_filename):
         file_name = name_file(file)
         result.save(os.path.expanduser(
             '{}/{}'.format(generatedPath, file_name)))
-        print('{}/{}'.format(generatedPath, file_name))
+        sys.stdout.write('{}/{}\n'.format(generatedPath, file_name))
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
