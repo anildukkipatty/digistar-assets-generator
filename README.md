@@ -21,4 +21,13 @@ run '`npm install`'
 ## Starting the app
  - run `npm run electron`
 
+## folder structure 
+ - backgrounds
+ - jackets
+ - heads
+ - chains
+ - caps
+ - glasses
+ - outputs
+
 <3 Anil
