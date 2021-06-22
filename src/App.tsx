@@ -1,16 +1,24 @@
 import './App.css';
-import * as imgs from './images.js';
+// import * as imgs from './images.js';
 import { useEffect, useState } from 'react';
+// import React from 'react';
 const dialog = window.require('electron').remote.dialog;
 const fs = window.require('electron').remote.require('fs');
 const {spawn} = window.require('electron').remote.require('child_process');
 
+interface Card {
+  folder: string;
+  imgB64: string;
+  fileLink: string;
+  selected: boolean;
+}
+
 function App() {
-  let [readBaseURI, setReadBaseURI] = useState(null);
-  let [writeBaseURI, setWriteBaseURI] = useState(null);
+  let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
+  // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, setOutput] = useState('');
-  let [outputImages, setOutputImages] = useState([]);
+  let [outputImages, setOutputImages] = useState<string[]>([]);
   let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
   let folderNames = [
     'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
@@ -21,8 +29,8 @@ function App() {
   async function init() {
     
   }
-  const [data, setData] = useState([])
-  const [p, setP] = useState()
+  const [data, setData] = useState<Card[]>([])
+  const [_p, setP] = useState(1)
   const imgStyleDiv = {
     width: '200px',
     border: '2px solid #000',
@@ -33,7 +41,7 @@ function App() {
     width: '200px',
     height: '200px',
   };
-  function imageSelected(obj) {
+  function imageSelected(obj: Card) {
     obj.selected = !obj.selected;
     setData(data);
     setP(new Date().getTime());
@@ -45,12 +53,11 @@ function App() {
       properties: ['openDirectory']
     });
     setReadBaseURI(path.filePaths[0]);
-    let dataObj = [];
-    // [{folder, imgSrc, selected}]
+    let dataObj: Card[] = [];
     folderNames.forEach(folder => {
       const names = fs.readdirSync(`${path.filePaths[0]}/${folder}`)
         .filter(filterJunkFiles)
-        .map(name => ({
+        .map((name: string) => ({
           folder,
           imgB64: `data:image/jpeg;base64, ${fs.readFileSync(`${path.filePaths[0]}/${folder}/${name}`).toString('base64')}`,
           fileLink: `${path.filePaths[0]}/${folder}/${name}`,
@@ -60,24 +67,20 @@ function App() {
       setData(dataObj);
     });
 
-    function filterJunkFiles(name) {
+    function filterJunkFiles(name: string) {
       return name != '.DS_Store'
     }
   }
 
   async function generateImages() {
-    let path;
-    // check to make sure the outputs folder exists
-    const imageObjs = data.filter(obj => obj.selected);
-    
-    const files = []
-    folderNames.map((folder, i) => {
+    const files: Card[][] = []
+    folderNames.map((folder, i: number) => {
       const files_selected = data.filter(obj => obj.folder === folder && obj.selected)
       if (files_selected.length > 0)
-        files[i] = files_selected
+        files[i] = files_selected;
     })
-    let finalOutput = []
-    recurbaby(0,files,[],finalOutput)
+    let finalOutput: string[][] = [];
+    recurbaby(0, files, [], finalOutput);
 
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
@@ -86,9 +89,9 @@ function App() {
     fs.writeFileSync('./composer.json', res);
     setNoOfImagesGenerated(finalOutput.length)
     setShowWIP(true);
-    const python = spawn("python3", ["./compose.py"]);
+    const python = spawn("./compose", [readBaseURI]);
 
-    python.stdout.on("data", data => {
+    python.stdout.on("data", (data: any) => {
         console.log(`stdout: ${data}`);
         setOutput((x) => `${x} \n ${data.toString()}`);
         try {
@@ -98,23 +101,23 @@ function App() {
         }
     });
 
-    python.stderr.on("data", data => {
+    python.stderr.on("data", (data: any) => {
         console.log(`stderr: ${data}`);
         setOutput(`${output} \n ${JSON.stringify(data)}`);
     });
 
-    python.on('error', (error) => {
+    python.on('error', (error: any) => {
         console.log(`error: ${error.message}`);
         setOutput(`${output} \n ${error.message}`);
     });
 
-    python.on("close", code => {
+    python.on("close", (code: any) => {
         console.log(`child process exited with code ${code}`);
         setOutput((x) => `${x} \n ${code}`);
     });
   }
 
-  function recurbaby(position, files, temp, finalOutput){
+  function recurbaby(position: number, files: Card[][], temp: string[], finalOutput: string[][]){
     if (position >= files.length)
       return
     for (let file of files[position]) {

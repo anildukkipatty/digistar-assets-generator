@@ -5,7 +5,7 @@ from helper import *
 
 image_size = (2140, 2140)
 
-
+generatedPath = '/usr/outputs'
 def generated_images_from_file(json_filename):
     generatedPath, files = load_json_data(json_filename)
     for file in files:
