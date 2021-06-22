@@ -6,11 +6,8 @@ run the following in the terminal\
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`\
 in order to install homebrew
 
- - Need python3 installed\
-run '`brew install python`'
-
- - Need pillow installed\
-run '`pip3 install Pillow`'
+ - Get the docker image ready
+run '`docker build . -t composer`'
 
  - Need Node installed\
 run '`brew install node`'
@@ -19,15 +16,6 @@ run '`brew install node`'
 run '`npm install`'
 
 ## Starting the app
- - run `npm run electron`
-
-## folder structure 
- - backgrounds
- - jackets
- - heads
- - chains
- - caps
- - glasses
- - outputs
+ - run `npm run start`
 
 <3 Anil
