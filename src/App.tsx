@@ -1,17 +1,58 @@
 import './App.css';
 // import * as imgs from './images.js';
-import { useEffect, useState } from 'react';
 // import React from 'react';
+// interface Card {
+//   folder: string;
+//   imgB64: string;
+//   fileLink: string;
+//   selected: boolean;
+//   fileName?: string;
+//   dependencies?: Card[];
+// }
+// folderNames.forEach(folder => {
+//   const names = fs.readdirSync(`${path.filePaths[0]}/${folder}`)
+//     .filter(filterJunkFiles)
+//     .map((name: string) => ({
+//       folder,
+//       imgB64: `data:image/png;base64, ${fs.readFileSync(`${path.filePaths[0]}/${folder}/${name}`).toString('base64')}`,
+//       fileLink: `${path.filePaths[0]}/${folder}/${name}`,
+//       selected: false
+//     }));
+//   dataObj = dataObj.concat(names);
+//   setData(dataObj);
+// });
+import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
 const fs = window.require('electron').remote.require('fs');
 const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
   folder: string;
-  imgB64: string;
   fileLink: string;
+  fileName: string;
   selected: boolean;
+  dependencies: CardDependency;
+  imgB64?: string;
+  sortingScore?: number;
 }
+interface CardDependency {
+  compulsory?: CardLike[];
+  atleastone?: CardLike[];
+  optionsl?: CardLike[];
+}
+interface CardLike {
+  folder: string;
+  fileName: string;
+  fileLink?: string;
+  selected?: boolean;
+  dependencies?: CardDependency[];
+  imgB64?: string;
+  sortingScore?: number;
+}
+const folderNames = [
+  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
+] as const;
+type FolderNames = typeof folderNames[number];
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
@@ -20,9 +61,6 @@ function App() {
   let [output, setOutput] = useState('');
   let [outputImages, setOutputImages] = useState<string[]>([]);
   let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
-  let folderNames = [
-    'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
-  ]
   useEffect(() => {
     init();
   }, []);
@@ -47,29 +85,48 @@ function App() {
     setP(new Date().getTime());
     return;
   }
+  function recurbaby(position: number, files: Card[][], temp: Card[], finalOutput: Card[][]){
+    if (position >= files.length)
+      return
+    for (let file of files[position]) {
+      recurbaby(position+1, files, [...temp, file], finalOutput)
+      if (position === files.length - 1){
+        
+        finalOutput.push([...temp, file])
+      }
+    }
+  }
+
+  function getCardOrderVal(card: Card): number {
+    const scoreDict: {[Property in FolderNames]: number} = {
+      backgrounds: 1, jackets: 3, heads: 2, chains: 4, glasses: 5, caps: 6
+    };
+    return card.sortingScore ? card.sortingScore : scoreDict[card.folder as FolderNames];
+  };
 
   async function settingReadBaseURI() {
     const path = await dialog.showOpenDialog({
       properties: ['openDirectory']
     });
     setReadBaseURI(path.filePaths[0]);
-    let dataObj: Card[] = [];
-    folderNames.forEach(folder => {
-      const names = fs.readdirSync(`${path.filePaths[0]}/${folder}`)
-        .filter(filterJunkFiles)
-        .map((name: string) => ({
-          folder,
-          imgB64: `data:image/jpeg;base64, ${fs.readFileSync(`${path.filePaths[0]}/${folder}/${name}`).toString('base64')}`,
-          fileLink: `${path.filePaths[0]}/${folder}/${name}`,
-          selected: false
-        }));
-      dataObj = dataObj.concat(names);
-      setData(dataObj);
-    });
-
-    function filterJunkFiles(name: string) {
-      return name != '.DS_Store'
-    }
+    // @todo:critical write better error handling
+    let metaData: Card[] = JSON.parse(fs.readFileSync(`${path.filePaths[0]}/meta-data.json`).toString())
+      .map((pc: Card) => {
+        pc.imgB64 = `data:image/png;base64, ${fs.readFileSync(pc.fileLink).toString('base64')}`
+        if (pc.dependencies.compulsory && pc.dependencies.compulsory.length > 0) {
+          
+          const newCompulsoryDependencies = pc.dependencies.compulsory
+          .map(c => {
+            const fileLink = `${path.filePaths[0]}/${pc.folder}/${c.fileName}`;
+            c = {...c, fileLink, imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`};
+            return c;
+          });
+          pc.dependencies.compulsory = newCompulsoryDependencies;
+        }
+        return pc;
+      });
+    
+      setData(metaData);
   }
 
   async function generateImages() {
@@ -79,12 +136,26 @@ function App() {
       if (files_selected.length > 0)
         files[i] = files_selected;
     })
-    let finalOutput: string[][] = [];
+    let finalOutput: Card[][] = [];
     recurbaby(0, files, [], finalOutput);
-
+    finalOutput = finalOutput
+      .map(cardsList => {
+        cardsList.forEach(card => {
+          if (card.dependencies.compulsory && card.dependencies.compulsory.length > 0) {
+            card.dependencies.compulsory.forEach(c => {
+              console.log(c);
+              
+              cardsList.push(c as Card);
+            });
+          }
+        });
+        return cardsList;
+      })
+      .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)));
+    
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
-      files: finalOutput
+      files: finalOutput.map(cl => cl.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
     setNoOfImagesGenerated(finalOutput.length)
@@ -95,15 +166,15 @@ function App() {
         console.log(`stdout: ${data}`);
         setOutput((x) => `${x} \n ${data.toString()}`);
         try {
-          setOutputImages(oldArr => [...oldArr, `data:image/jpeg;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+          setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
         } catch (error) {
           console.log('Error loading output file: ', data.toString());
         }
     });
 
-    python.stderr.on("data", (data: any) => {
+    python.stderr.on("data", (data: Buffer) => {
         console.log(`stderr: ${data}`);
-        setOutput(`${output} \n ${JSON.stringify(data)}`);
+        setOutput(`${output} \n ${data.toString()}`);
     });
 
     python.on('error', (error: any) => {
@@ -111,22 +182,12 @@ function App() {
         setOutput(`${output} \n ${error.message}`);
     });
 
-    python.on("close", (code: any) => {
+    python.on("close", (code: unknown) => {
         console.log(`child process exited with code ${code}`);
         setOutput((x) => `${x} \n ${code}`);
     });
   }
 
-  function recurbaby(position: number, files: Card[][], temp: string[], finalOutput: string[][]){
-    if (position >= files.length)
-      return
-    for (let file of files[position]) {
-      recurbaby(position+1, files, [...temp, file.fileLink], finalOutput)
-      if (position === files.length - 1){
-        finalOutput.push([...temp, file.fileLink])
-      }
-    }
-  }
   return (
     <>
     <div className="App" style={{display: showWIP ? 'none' : 'flex', flexDirection: 'column'}}>
