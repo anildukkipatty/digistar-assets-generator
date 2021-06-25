@@ -6,12 +6,14 @@ interface Card {
   fileLink: string;
   fileName: string;
   selected: boolean;
-  dependencies: CardDependency[];
+  dependencies: CardDependency;
   imgB64?: string;
+  sortingScore?: number;
 }
 interface CardDependency {
-  type: 'compulsory' | 'atleastone' | 'optional';
-  card: CardLike;
+  compulsory?: CardLike[];
+  atleastone?: CardLike[];
+  optionsl?: CardLike[];
 }
 interface CardLike {
   folder: string;
@@ -20,6 +22,7 @@ interface CardLike {
   selected?: boolean;
   dependencies?: CardDependency[];
   imgB64?: string;
+  sortingScore?: number;
 }
 let folderNames = [
   'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
@@ -39,7 +42,7 @@ async function bootUp(folderLoc: string){
         fileLink: `${folderLoc}/${folder}/${name}`,
         selected: false,
         fileName: name,
-        dependencies: []
+        dependencies: {}
       }));
     dataObj = dataObj.concat(names);
   });
