@@ -22,9 +22,9 @@ def name_file(files):
 
 
 def compose_images(files, size):
-    result = Image.new(mode='RGB', size=size, color=(255, 255, 255))
+    result = Image.new(mode='RGBA', size=size, color=(255, 255, 255))
     for index, file in enumerate(files):
-        img = Image.open(os.path.expanduser(file))
+        img = Image.open(os.path.expanduser(file)).convert('RGBA')
         result.paste(img, (0, 0), mask=img)
     return result
 
