@@ -23,8 +23,9 @@ import './App.css';
 // });
 import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
+const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
-const {spawn} = window.require('electron').remote.require('child_process');
+// const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
   folder: string;
@@ -58,14 +59,17 @@ function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
   // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
-  let [output, setOutput] = useState('');
+  let [output, _setOutput] = useState('');
   let [outputImages, setOutputImages] = useState<string[]>([]);
   let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
   useEffect(() => {
     init();
   }, []);
   async function init() {
-    
+    ipcRenderer.on('jimp-reply', (_event: any, data: string) => {
+      setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
+      console.log('jimp-reply', data);
+    });
   }
   const [data, setData] = useState<Card[]>([])
   const [_p, setP] = useState(1)
@@ -160,32 +164,34 @@ function App() {
     fs.writeFileSync('./composer.json', res);
     setNoOfImagesGenerated(finalOutput.length)
     setShowWIP(true);
-    const python = spawn("./compose", [readBaseURI]);
+    ipcRenderer.send('jimp-concat', 'ping');
+    return;
+    // const python = spawn("./compose", [readBaseURI]);
 
-    python.stdout.on("data", (data: any) => {
-        console.log(`stdout: ${data}`);
-        setOutput((x) => `${x} \n ${data.toString()}`);
-        try {
-          setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
-        } catch (error) {
-          console.log('Error loading output file: ', data.toString());
-        }
-    });
+    // python.stdout.on("data", (data: any) => {
+    //     console.log(`stdout: ${data}`);
+    //     setOutput((x) => `${x} \n ${data.toString()}`);
+    //     try {
+    //       setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+    //     } catch (error) {
+    //       console.log('Error loading output file: ', data.toString());
+    //     }
+    // });
 
-    python.stderr.on("data", (data: Buffer) => {
-        console.log(`stderr: ${data}`);
-        setOutput(`${output} \n ${data.toString()}`);
-    });
+    // python.stderr.on("data", (data: Buffer) => {
+    //     console.log(`stderr: ${data}`);
+    //     setOutput(`${output} \n ${data.toString()}`);
+    // });
 
-    python.on('error', (error: any) => {
-        console.log(`error: ${error.message}`);
-        setOutput(`${output} \n ${error.message}`);
-    });
+    // python.on('error', (error: any) => {
+    //     console.log(`error: ${error.message}`);
+    //     setOutput(`${output} \n ${error.message}`);
+    // });
 
-    python.on("close", (code: unknown) => {
-        console.log(`child process exited with code ${code}`);
-        setOutput((x) => `${x} \n ${code}`);
-    });
+    // python.on("close", (code: unknown) => {
+    //     console.log(`child process exited with code ${code}`);
+    //     setOutput((x) => `${x} \n ${code}`);
+    // });
   }
 
   return (
