@@ -25,7 +25,6 @@ import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
-const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
   folder: string;
@@ -53,28 +52,27 @@ interface CardLike {
 const folderNames = [
   'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
 ] as const;
-type FolderNames = typeof folderNames[number];
+// type FolderNames = typeof folderNames[number];
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
   // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, _setOutput] = useState('');
-  let [outputImages, _setOutputImages] = useState<string[]>([]);
-  let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
-  let [noOfCombinations, setNoOfCombinations] = useState(0);
   useEffect(() => {
     init();
   }, []);
   async function init() {
     ipcRenderer.on('jimp-reply', (_event: any, data: string) => {
-      // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
-      setNoOfImagesGenerated(num => ++num);
       console.log('jimp-reply', data);
     });
   }
   const [data, setData] = useState<Card[]>([])
   const [_p, setP] = useState(1)
+  type TempSortingScore = {
+    [Property: string]: number
+  }
+  const [tempSortingScores, setTempSortingScores] = useState<TempSortingScore>({});
   const imgStyleDiv = {
     width: '200px',
     border: '2px solid #000',
@@ -91,24 +89,13 @@ function App() {
     setP(new Date().getTime());
     return;
   }
-  function recurbaby(position: number, files: Card[][], temp: Card[], finalOutput: Card[][]){
-    if (position >= files.length)
-      return
-    for (let file of files[position]) {
-      recurbaby(position+1, files, [...temp, file], finalOutput)
-      if (position === files.length - 1){
-        
-        finalOutput.push([...temp, file])
-      }
-    }
-  }
 
-  function getCardOrderVal(card: Card): number {
-    const scoreDict: {[Property in FolderNames]: number} = {
-      backgrounds: 1, jackets: 3, heads: 2, chains: 4, glasses: 5, caps: 6
-    };
-    return card.sortingScore ? card.sortingScore : scoreDict[card.folder as FolderNames];
-  };
+  // function getCardOrderVal(card: Card): number {
+  //   const scoreDict: {[Property in FolderNames]: number} = {
+  //     backgrounds: 1, jackets: 3, heads: 2, chains: 4, glasses: 5, caps: 6
+  //   };
+  //   return card.sortingScore ? card.sortingScore : scoreDict[card.folder as FolderNames];
+  // };
 
   async function settingReadBaseURI() {
     const path = await dialog.showOpenDialog({
@@ -136,65 +123,44 @@ function App() {
   }
 
   async function generateImages() {
-    const files: Card[][] = []
-    folderNames.map((folder, i: number) => {
-      const files_selected = data.filter(obj => obj.folder === folder && obj.selected)
-      if (files_selected.length > 0)
-        files[i] = files_selected;
-    })
-    let finalOutput: Card[][] = [];
-    recurbaby(0, files, [], finalOutput);
-    finalOutput = finalOutput
-      .map(cardsList => {
-        cardsList.forEach(card => {
-          if (card.dependencies.compulsory && card.dependencies.compulsory.length > 0) {
-            card.dependencies.compulsory.forEach(c => {
-              console.log(c);
-              
-              cardsList.push(c as Card);
-            });
-          }
+    const tempData = data.map(c => {
+      const item = {...c} as CardLike;
+      delete item.imgB64;
+      delete item.selected;
+      if (c.dependencies.compulsory && c.dependencies.compulsory.length > 0) {
+        c.dependencies.compulsory = c.dependencies.compulsory.map(d => {
+          const item = {...d};
+          delete item.imgB64;
+          delete item.selected;
+          delete item.dependencies;
+          return item;
         });
-        return cardsList;
-      })
-      .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)));
-    
-    const res = JSON.stringify({
-      generatedPath: `${readBaseURI}/outputs`,
-      files: finalOutput.map(cl => cl.map(c => c.fileLink))
+      }
+      return item;
     });
-    fs.writeFileSync('./composer.json', res);
-    setNoOfCombinations(finalOutput.length)
+    fs.writeFileSync('test.json', JSON.stringify(tempData));
+  }
+  function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.preventDefault();
+    e.stopPropagation();
     setShowWIP(true);
-    // ipcRenderer.send('jimp-concat', 'ping');
-    // return;
-    const python = spawn("./compose", [readBaseURI]);
-
-    python.stdout.on("data", (data: any) => {
-        console.log(`stdout: ${data}`);
-        _setOutput((x) => `${x} \n ${data.toString()}`);
-        setNoOfImagesGenerated(num => ++num);
-        try {
-          // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
-        } catch (error) {
-          console.log('Error loading output file: ', data.toString());
-        }
-    });
-
-    python.stderr.on("data", (data: Buffer) => {
-        console.log(`stderr: ${data}`);
-        _setOutput(`${output} \n ${data.toString()}`);
-    });
-
-    python.on('error', (error: any) => {
-        console.log(`error: ${error.message}`);
-        _setOutput(`${output} \n ${error.message}`);
-    });
-
-    python.on("close", (code: unknown) => {
-        console.log(`child process exited with code ${code}`);
-        _setOutput((x) => `${x} \n ${code}`);
-    });
+    console.log(data);
+    return false;
+  }
+  async function addDependencyToCard(c: Card) {
+    const selectedCard = data.filter(c => c.selected)[0];
+    const item = {...c};
+    const numScore = tempSortingScores[item.fileName];
+    if (numScore) {
+      item.sortingScore = numScore;
+    }
+    if (selectedCard.dependencies.compulsory) {
+      selectedCard.dependencies.compulsory.push(item as CardLike);
+    } else {
+      selectedCard.dependencies.compulsory = [item as CardLike];
+    }
+    alert('Dependency added');
+    setP(new Date().getTime());
   }
 
   return (
@@ -218,6 +184,13 @@ function App() {
                   <div key={i} onClick={_ => imageSelected(obj)} style={{...imgStyleDiv}}>
                     <span>{obj.selected ? 'SELECTED' : ''}</span>
                     <img style={imgStyle} alt="" src={obj.imgB64} />
+                    {obj.selected ?  (
+                      <div>
+                        <button onClick={(e) => showAddDependency(e)}>Add Dependency</button>
+                        <button>Add sortingScore</button>
+                        <button>Delete item</button>
+                      </div>
+                    ) : '' }
                   </div>
                 )
               })}
@@ -227,18 +200,34 @@ function App() {
       })}
     </div>
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
-      <p>No of combinations: {noOfCombinations}</p>
-      <p>No of images to be generated: {noOfImagesdGenerated}</p>
+      <button onClick={() => setShowWIP(false)}>Go Back</button>
+      <p>Choose dependencies: {JSON.stringify(tempSortingScores)}</p>
+      <div style={{...imgStyleDiv}}>
+        {
+          (data.filter(c => c.selected).length > 0) ? (
+            <img style={imgStyle} alt="" src={data.filter(c => c.selected)[0].imgB64} />
+          ): 'Nothing selected'
+        }
+        {
+          (data.filter(c => c.selected).length > 0) ?
+            data.filter(c => c.selected)[0].dependencies.compulsory?.map(c => c.fileName).join(' | ')
+          : 'No Dependencies yet'
+        }
+      </div>
       <div>
         <pre>
           {output}
         </pre>
       </div>
       <div style={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
-        {outputImages.map((obj, i) => {
+        {data.filter(c => c.folder === 'jackets').map((obj, i) => {
           return (
-            <div key={i} style={{...imgStyleDiv}}>
-              <img style={imgStyle} alt="" src={obj} />
+            <div onClick={() => addDependencyToCard(obj)} key={i} style={{...imgStyleDiv}}>
+              <img style={imgStyle} alt="" src={obj.imgB64} />
+              <input onClick={e => e.stopPropagation()} onChange={e => setTempSortingScores(o => {
+                o[obj.fileName] = parseInt(e.target.value);
+                return {...o};
+              })} type="text" value={tempSortingScores[obj.fileName]} />
             </div>
           )
         })}
