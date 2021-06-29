@@ -25,7 +25,7 @@ import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
-// const {spawn} = window.require('electron').remote.require('child_process');
+const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
   folder: string;
@@ -166,34 +166,35 @@ function App() {
     fs.writeFileSync('./composer.json', res);
     setNoOfCombinations(finalOutput.length)
     setShowWIP(true);
-    ipcRenderer.send('jimp-concat', 'ping');
-    return;
-    // const python = spawn("./compose", [readBaseURI]);
+    // ipcRenderer.send('jimp-concat', 'ping');
+    // return;
+    const python = spawn("./compose", [readBaseURI]);
 
-    // python.stdout.on("data", (data: any) => {
-    //     console.log(`stdout: ${data}`);
-    //     setOutput((x) => `${x} \n ${data.toString()}`);
-    //     try {
-    //       setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
-    //     } catch (error) {
-    //       console.log('Error loading output file: ', data.toString());
-    //     }
-    // });
+    python.stdout.on("data", (data: any) => {
+        console.log(`stdout: ${data}`);
+        _setOutput((x) => `${x} \n ${data.toString()}`);
+        setNoOfImagesGenerated(num => ++num);
+        try {
+          // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+        } catch (error) {
+          console.log('Error loading output file: ', data.toString());
+        }
+    });
 
-    // python.stderr.on("data", (data: Buffer) => {
-    //     console.log(`stderr: ${data}`);
-    //     setOutput(`${output} \n ${data.toString()}`);
-    // });
+    python.stderr.on("data", (data: Buffer) => {
+        console.log(`stderr: ${data}`);
+        _setOutput(`${output} \n ${data.toString()}`);
+    });
 
-    // python.on('error', (error: any) => {
-    //     console.log(`error: ${error.message}`);
-    //     setOutput(`${output} \n ${error.message}`);
-    // });
+    python.on('error', (error: any) => {
+        console.log(`error: ${error.message}`);
+        _setOutput(`${output} \n ${error.message}`);
+    });
 
-    // python.on("close", (code: unknown) => {
-    //     console.log(`child process exited with code ${code}`);
-    //     setOutput((x) => `${x} \n ${code}`);
-    // });
+    python.on("close", (code: unknown) => {
+        console.log(`child process exited with code ${code}`);
+        _setOutput((x) => `${x} \n ${code}`);
+    });
   }
 
   return (
