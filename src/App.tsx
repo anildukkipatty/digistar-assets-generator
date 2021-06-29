@@ -60,14 +60,16 @@ function App() {
   // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, _setOutput] = useState('');
-  let [outputImages, setOutputImages] = useState<string[]>([]);
+  let [outputImages, _setOutputImages] = useState<string[]>([]);
   let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
+  let [noOfCombinations, setNoOfCombinations] = useState(0);
   useEffect(() => {
     init();
   }, []);
   async function init() {
     ipcRenderer.on('jimp-reply', (_event: any, data: string) => {
-      setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
+      // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
+      setNoOfImagesGenerated(num => ++num);
       console.log('jimp-reply', data);
     });
   }
@@ -162,7 +164,7 @@ function App() {
       files: finalOutput.map(cl => cl.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
-    setNoOfImagesGenerated(finalOutput.length)
+    setNoOfCombinations(finalOutput.length)
     setShowWIP(true);
     ipcRenderer.send('jimp-concat', 'ping');
     return;
@@ -224,6 +226,7 @@ function App() {
       })}
     </div>
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
+      <p>No of combinations: {noOfCombinations}</p>
       <p>No of images to be generated: {noOfImagesdGenerated}</p>
       <div>
         <pre>
