@@ -91,14 +91,14 @@ function App() {
     setP(new Date().getTime());
     return;
   }
-  function recurbaby(position: number, files: Card[][], temp: Card[], finalOutput: Card[][]){
-    if (position >= files.length)
+  function recurbaby(position: number, cardsArrList: Card[][], tempCardsArr: Card[], finalOutput: Card[][]){
+    if (position >= cardsArrList.length)
       return
-    for (let file of files[position]) {
-      recurbaby(position+1, files, [...temp, file], finalOutput)
-      if (position === files.length - 1){
+    for (let card of cardsArrList[position]) {
+      recurbaby(position+1, cardsArrList, [...tempCardsArr, card], finalOutput)
+      if (position === cardsArrList.length - 1){
         
-        finalOutput.push([...temp, file])
+        finalOutput.push([...tempCardsArr, card])
       }
     }
   }
@@ -137,13 +137,13 @@ function App() {
 
   async function generateImages() {
     const files: Card[][] = []
-    folderNames.map((folder, i: number) => {
+    folderNames.forEach((folder, i: number) => {
       const files_selected = data.filter(obj => obj.folder === folder && obj.selected)
       if (files_selected.length > 0)
         files[i] = files_selected;
     })
     let finalOutput: Card[][] = [];
-    recurbaby(0, files, [], finalOutput);
+    recurbaby(0, files.filter(ar => ar.length > 0), [], finalOutput);
     finalOutput = finalOutput
       .map(cardsList => {
         cardsList.forEach(card => {
