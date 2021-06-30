@@ -139,6 +139,7 @@ function App() {
       return item;
     });
     fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(tempData));
+    alert('Done');
   }
   function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();
@@ -189,12 +190,45 @@ function App() {
       </div>
     )
   }
+  async function initialMetaData() {
+    const path = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    const chosenPath = path.filePaths[0] as string;
+    await bootUp(chosenPath);
+    alert('ready');
+  }
+  function filterJunkFiles(name: string): boolean {
+    return name != '.DS_Store'
+  }
+  
+  async function bootUp(folderLoc: string){
+    let dataObj: Card[] = [];
+    folderNames.forEach(folder => {
+      const names = fs.readdirSync(`${folderLoc}/${folder}`)
+        .filter(filterJunkFiles)
+        .map((name: string) => ({
+          folder,
+          // imgB64: `data:image/jpeg;base64, ${fs.readFileSync(`${folderLoc}/${folder}/${name}`).toString('base64')}`,
+          fileLink: `${folderLoc}/${folder}/${name}`,
+          selected: false,
+          fileName: name,
+          dependencies: {}
+        }));
+      dataObj = dataObj.concat(names);
+    });
+    
+    fs.writeFileSync(folderLoc+'/meta-data.json', JSON.stringify(dataObj));
+  }
 
   return (
     <>
     <div className="App" style={{display: showWIP ? 'none' : 'flex', flexDirection: 'column'}}>
       {! readBaseURI ? (
-        <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
+        <>
+          <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => initialMetaData()}>Generate initial metadata</button>
+        </>
       ) : 
       (
         <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
