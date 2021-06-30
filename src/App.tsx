@@ -25,7 +25,7 @@ import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
-// const {spawn} = window.require('electron').remote.require('child_process');
+const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
   folder: string;
@@ -60,14 +60,16 @@ function App() {
   // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, _setOutput] = useState('');
-  let [outputImages, setOutputImages] = useState<string[]>([]);
+  let [outputImages, _setOutputImages] = useState<string[]>([]);
   let [noOfImagesdGenerated, setNoOfImagesGenerated] = useState(0);
+  let [noOfCombinations, setNoOfCombinations] = useState(0);
   useEffect(() => {
     init();
   }, []);
   async function init() {
     ipcRenderer.on('jimp-reply', (_event: any, data: string) => {
-      setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
+      // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data).toString('base64')}`])
+      setNoOfImagesGenerated(num => ++num);
       console.log('jimp-reply', data);
     });
   }
@@ -89,14 +91,14 @@ function App() {
     setP(new Date().getTime());
     return;
   }
-  function recurbaby(position: number, files: Card[][], temp: Card[], finalOutput: Card[][]){
-    if (position >= files.length)
+  function recurbaby(position: number, cardsArrList: Card[][], tempCardsArr: Card[], finalOutput: Card[][]){
+    if (position >= cardsArrList.length)
       return
-    for (let file of files[position]) {
-      recurbaby(position+1, files, [...temp, file], finalOutput)
-      if (position === files.length - 1){
+    for (let card of cardsArrList[position]) {
+      recurbaby(position+1, cardsArrList, [...tempCardsArr, card], finalOutput)
+      if (position === cardsArrList.length - 1){
         
-        finalOutput.push([...temp, file])
+        finalOutput.push([...tempCardsArr, card])
       }
     }
   }
@@ -135,13 +137,13 @@ function App() {
 
   async function generateImages() {
     const files: Card[][] = []
-    folderNames.map((folder, i: number) => {
+    folderNames.forEach((folder, i: number) => {
       const files_selected = data.filter(obj => obj.folder === folder && obj.selected)
       if (files_selected.length > 0)
         files[i] = files_selected;
     })
     let finalOutput: Card[][] = [];
-    recurbaby(0, files, [], finalOutput);
+    recurbaby(0, files.filter(ar => ar.length > 0), [], finalOutput);
     finalOutput = finalOutput
       .map(cardsList => {
         cardsList.forEach(card => {
@@ -162,36 +164,37 @@ function App() {
       files: finalOutput.map(cl => cl.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
-    setNoOfImagesGenerated(finalOutput.length)
+    setNoOfCombinations(finalOutput.length)
     setShowWIP(true);
-    ipcRenderer.send('jimp-concat', 'ping');
-    return;
-    // const python = spawn("./compose", [readBaseURI]);
+    // ipcRenderer.send('jimp-concat', 'ping');
+    // return;
+    const python = spawn("./compose", [readBaseURI]);
 
-    // python.stdout.on("data", (data: any) => {
-    //     console.log(`stdout: ${data}`);
-    //     setOutput((x) => `${x} \n ${data.toString()}`);
-    //     try {
-    //       setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
-    //     } catch (error) {
-    //       console.log('Error loading output file: ', data.toString());
-    //     }
-    // });
+    python.stdout.on("data", (data: any) => {
+        console.log(`stdout: ${data}`);
+        _setOutput((x) => `${x} \n ${data.toString()}`);
+        setNoOfImagesGenerated(num => ++num);
+        try {
+          // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+        } catch (error) {
+          console.log('Error loading output file: ', data.toString());
+        }
+    });
 
-    // python.stderr.on("data", (data: Buffer) => {
-    //     console.log(`stderr: ${data}`);
-    //     setOutput(`${output} \n ${data.toString()}`);
-    // });
+    python.stderr.on("data", (data: Buffer) => {
+        console.log(`stderr: ${data}`);
+        _setOutput(`${output} \n ${data.toString()}`);
+    });
 
-    // python.on('error', (error: any) => {
-    //     console.log(`error: ${error.message}`);
-    //     setOutput(`${output} \n ${error.message}`);
-    // });
+    python.on('error', (error: any) => {
+        console.log(`error: ${error.message}`);
+        _setOutput(`${output} \n ${error.message}`);
+    });
 
-    // python.on("close", (code: unknown) => {
-    //     console.log(`child process exited with code ${code}`);
-    //     setOutput((x) => `${x} \n ${code}`);
-    // });
+    python.on("close", (code: unknown) => {
+        console.log(`child process exited with code ${code}`);
+        _setOutput((x) => `${x} \n ${code}`);
+    });
   }
 
   return (
@@ -224,6 +227,7 @@ function App() {
       })}
     </div>
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
+      <p>No of combinations: {noOfCombinations}</p>
       <p>No of images to be generated: {noOfImagesdGenerated}</p>
       <div>
         <pre>
