@@ -122,7 +122,7 @@ function App() {
       setData(metaData);
   }
 
-  async function generateImages() {
+  async function generateMetaData() {
     const tempData = data.map(c => {
       const item = {...c} as CardLike;
       delete item.imgB64;
@@ -138,7 +138,7 @@ function App() {
       }
       return item;
     });
-    fs.writeFileSync('test.json', JSON.stringify(tempData));
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(tempData));
   }
   function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();
@@ -147,20 +147,47 @@ function App() {
     console.log(data);
     return false;
   }
+  // @todo: support array of cards Card[]
   async function addDependencyToCard(c: Card) {
-    const selectedCard = data.filter(c => c.selected)[0];
+    const selectedCards = data.filter(c => c.selected);
     const item = {...c};
     const numScore = tempSortingScores[item.fileName];
     if (numScore) {
       item.sortingScore = numScore;
     }
-    if (selectedCard.dependencies.compulsory) {
-      selectedCard.dependencies.compulsory.push(item as CardLike);
-    } else {
-      selectedCard.dependencies.compulsory = [item as CardLike];
+    for await (const card of selectedCards) {
+      if (card.dependencies.compulsory && card.dependencies.compulsory.length > 0) {
+        card.dependencies.compulsory.push(item as CardLike);
+      } else {
+        card.dependencies.compulsory = [item as CardLike];
+      }
     }
     alert('Dependency added');
     setP(new Date().getTime());
+  }
+  function deleteCard(e:React.MouseEvent<HTMLButtonElement, MouseEvent>, card: Card) {
+    e.stopPropagation();
+    setData(d => d.filter(c => c.fileName !== card.fileName));
+    setP(new Date().getTime());
+  }
+  function updateSortingScore(e: React.KeyboardEvent<HTMLInputElement>, card: Card) {
+    e.stopPropagation();
+    if (e.code === 'Enter') {
+      card.sortingScore = parseFloat(e.currentTarget.value);
+      console.log('Updated SortingScore');
+    }
+  }
+  function selectedCardsEl(card: Card) {
+    return (
+      <div style={{...imgStyleDiv}}>
+        <img style={imgStyle} alt="" src={card.imgB64} />
+        {
+          (data.filter(c => c.selected).length > 0) ?
+            card.dependencies.compulsory?.map(c => c.fileName).join(' | ')
+          : 'No Dependencies yet'
+        }
+      </div>
+    )
   }
 
   return (
@@ -170,7 +197,7 @@ function App() {
         <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
       ) : 
       (
-        <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
+        <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
       )
       }
       {readBaseURI}
@@ -184,11 +211,13 @@ function App() {
                   <div key={i} onClick={_ => imageSelected(obj)} style={{...imgStyleDiv}}>
                     <span>{obj.selected ? 'SELECTED' : ''}</span>
                     <img style={imgStyle} alt="" src={obj.imgB64} />
+                    <p>{obj.fileName}</p>
                     {obj.selected ?  (
                       <div>
                         <button onClick={(e) => showAddDependency(e)}>Add Dependency</button>
-                        <button>Add sortingScore</button>
-                        <button>Delete item</button>
+                        {/* <button onClick={e => addSortingScore(e, obj)}>Add sortingScore</button> */}
+                        <input onClick={e => e.stopPropagation()} onKeyPress={e => updateSortingScore(e, obj)} type="text" placeholder="update sorting score" />
+                        <button onClick={e => deleteCard(e, obj)}>Delete item</button>
                       </div>
                     ) : '' }
                   </div>
@@ -202,18 +231,7 @@ function App() {
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
       <button onClick={() => setShowWIP(false)}>Go Back</button>
       <p>Choose dependencies: {JSON.stringify(tempSortingScores)}</p>
-      <div style={{...imgStyleDiv}}>
-        {
-          (data.filter(c => c.selected).length > 0) ? (
-            <img style={imgStyle} alt="" src={data.filter(c => c.selected)[0].imgB64} />
-          ): 'Nothing selected'
-        }
-        {
-          (data.filter(c => c.selected).length > 0) ?
-            data.filter(c => c.selected)[0].dependencies.compulsory?.map(c => c.fileName).join(' | ')
-          : 'No Dependencies yet'
-        }
-      </div>
+      {data.filter(c => c.selected).map(c => selectedCardsEl(c))}
       <div>
         <pre>
           {output}
@@ -224,10 +242,11 @@ function App() {
           return (
             <div onClick={() => addDependencyToCard(obj)} key={i} style={{...imgStyleDiv}}>
               <img style={imgStyle} alt="" src={obj.imgB64} />
+              <p>{obj.fileName}</p>
               <input onClick={e => e.stopPropagation()} onChange={e => setTempSortingScores(o => {
-                o[obj.fileName] = parseInt(e.target.value);
+                o[obj.fileName] = parseFloat(e.target.value);
                 return {...o};
-              })} type="text" value={tempSortingScores[obj.fileName]} />
+              })} type="number" value={tempSortingScores[obj.fileName]} />
             </div>
           )
         })}
