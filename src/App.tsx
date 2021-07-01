@@ -171,7 +171,7 @@ function App() {
     fs.writeFileSync('./composer.json', res);
     setNoOfCombinations(finalOutput.length)
     setShowWIP(true);
-    if (os.platform() === MACOS) {
+    if (os.platform() === WINDOWS) {
       ipcRenderer.send('jimp-concat', 'ping');
       return;
     }
