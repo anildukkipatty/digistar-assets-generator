@@ -52,8 +52,6 @@ electron.ipcMain.on('jimp-concat', async (event, arg) => {
 	let data;
 	try {
 		data = JSON.parse(fs.readFileSync('composer.json').toString());
-		console.log(data);
-		
 		for await (filesList of data.files) {
 			const bgLayer = await whiteJimpImg(2140, 2140);
 			const res = await composeImageFromFiles(filesList, bgLayer, data.generatedPath);

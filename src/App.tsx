@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
+const os = window.require('os');
 const {spawn} = window.require('electron').remote.require('child_process');
 
 interface Card {
@@ -53,6 +54,8 @@ interface CardLike {
 const folderNames = [
   'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
 ] as const;
+const WINDOWS = 'win32';
+const MACOS = 'darwin';
 type FolderNames = typeof folderNames[number];
 
 function App() {
@@ -72,6 +75,8 @@ function App() {
       setNoOfImagesGenerated(num => ++num);
       console.log('jimp-reply', data);
     });
+    console.log(os.platform() == MACOS, os.platform() === WINDOWS);
+    
   }
   const [data, setData] = useState<Card[]>([])
   const [_p, setP] = useState(1)
@@ -166,8 +171,10 @@ function App() {
     fs.writeFileSync('./composer.json', res);
     setNoOfCombinations(finalOutput.length)
     setShowWIP(true);
-    // ipcRenderer.send('jimp-concat', 'ping');
-    // return;
+    if (os.platform() === MACOS) {
+      ipcRenderer.send('jimp-concat', 'ping');
+      return;
+    }
     const python = spawn("./compose", [readBaseURI]);
 
     python.stdout.on("data", (data: any) => {
@@ -228,7 +235,7 @@ function App() {
     </div>
     <div style={{display: showWIP ? 'flex' : 'none', flexDirection: 'column'}}>
       <p>No of combinations: {noOfCombinations}</p>
-      <p>No of images to be generated: {noOfImagesdGenerated}</p>
+      <p>No of images generated: {noOfImagesdGenerated}</p>
       <div>
         <pre>
           {output}
