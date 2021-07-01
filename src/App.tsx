@@ -196,8 +196,13 @@ function App() {
     });
     const chosenPath = path.filePaths[0] as string;
     const updatedChosenPath = `./nftImages${chosenPath.split('/nftImages')[1]}`;
-    await bootUp(updatedChosenPath);
-    alert('ready');
+    try {
+      await bootUp(updatedChosenPath);
+      alert('ready');
+    } catch (error) {
+      alert('Organise assets into the right folders');
+      console.log(error);
+    }
   }
   function filterJunkFiles(name: string): boolean {
     return name != '.DS_Store'
