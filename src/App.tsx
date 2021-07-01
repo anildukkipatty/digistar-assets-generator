@@ -196,9 +196,7 @@ function App() {
     });
     const chosenPath = path.filePaths[0] as string;
     const updatedChosenPath = `./nftImages${chosenPath.split('/nftImages')[1]}`;
-    alert(updatedChosenPath);
-    return;
-    await bootUp(chosenPath);
+    await bootUp(updatedChosenPath);
     alert('ready');
   }
   function filterJunkFiles(name: string): boolean {
