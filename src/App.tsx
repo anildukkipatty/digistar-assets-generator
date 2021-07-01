@@ -195,6 +195,9 @@ function App() {
       properties: ['openDirectory']
     });
     const chosenPath = path.filePaths[0] as string;
+    const updatedChosenPath = `./nftImages${chosenPath.split('/nftImages')[1]}`;
+    alert(updatedChosenPath);
+    return;
     await bootUp(chosenPath);
     alert('ready');
   }
@@ -220,6 +223,17 @@ function App() {
     
     fs.writeFileSync(folderLoc+'/meta-data.json', JSON.stringify(dataObj));
   }
+  async function updateBulkSortingScore(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.code === 'Enter') {
+      const score = event.currentTarget.value;
+      setData(data => data.map(c => {
+        if (! c.selected) return c;
+        c.sortingScore = parseFloat(score);
+        return c;
+      }));
+      alert('Done');
+    }
+  }
 
   return (
     <>
@@ -231,10 +245,15 @@ function App() {
         </>
       ) : 
       (
-        <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
+        <>
+          <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
+          <input placeholder="Bulk update sorting score" type="number" onKeyPress={e => updateBulkSortingScore(e)} />
+        </>
       )
       }
       {readBaseURI}
+      <br />
+      {`No of slected items: ${data.filter(c => c.selected).length}`}
       {folderNames.map((folder, i) => {
         return (
           <div key={i}>
