@@ -1,5 +1,4 @@
 import {Card, DependencyManager, filterJunkFiles, FSCardLoader, InitialDataLoader, MetaDataGenerator, RelativePath} from '../cards';
-// const {InitialDataLoader} = require('../cards');
 
 test('InitialDataLoader', () => {
   const fs = {
