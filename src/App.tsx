@@ -1,64 +1,18 @@
 import './App.css';
-// import * as imgs from './images.js';
-// import React from 'react';
-// interface Card {
-//   folder: string;
-//   imgB64: string;
-//   fileLink: string;
-//   selected: boolean;
-//   fileName?: string;
-//   dependencies?: Card[];
-// }
-// folderNames.forEach(folder => {
-//   const names = fs.readdirSync(`${path.filePaths[0]}/${folder}`)
-//     .filter(filterJunkFiles)
-//     .map((name: string) => ({
-//       folder,
-//       imgB64: `data:image/png;base64, ${fs.readFileSync(`${path.filePaths[0]}/${folder}/${name}`).toString('base64')}`,
-//       fileLink: `${path.filePaths[0]}/${folder}/${name}`,
-//       selected: false
-//     }));
-//   dataObj = dataObj.concat(names);
-//   setData(dataObj);
-// });
 import { useEffect, useState } from 'react';
+import {Card, folderNames, InitialDataLoader, RelativePath, MetaDataGenerator, TempSortingScore, DependencyManager, FSCardLoader} from './cards';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
 
-interface Card {
-  folder: string;
-  fileLink: string;
-  fileName: string;
-  selected: boolean;
-  dependencies: CardDependency;
-  imgB64?: string;
-  sortingScore?: number;
-}
-interface CardDependency {
-  compulsory?: CardLike[];
-  atleastone?: CardLike[];
-  optionsl?: CardLike[];
-}
-interface CardLike {
-  folder: string;
-  fileName: string;
-  fileLink?: string;
-  selected?: boolean;
-  dependencies?: CardDependency[];
-  imgB64?: string;
-  sortingScore?: number;
-}
-const folderNames = [
-  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
-] as const;
-// type FolderNames = typeof folderNames[number];
-
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
-  // let [writeBaseURI, setWriteBaseURI] = useState(null);
   let [showWIP, setShowWIP] = useState(false);
   let [output, _setOutput] = useState('');
+  const [data, setData] = useState<Card[]>([])
+  const [_p, setP] = useState(1)
+  const [tempSortingScores, setTempSortingScores] = useState<TempSortingScore>({});
+  
   useEffect(() => {
     init();
   }, []);
@@ -67,12 +21,7 @@ function App() {
       console.log('jimp-reply', data);
     });
   }
-  const [data, setData] = useState<Card[]>([])
-  const [_p, setP] = useState(1)
-  type TempSortingScore = {
-    [Property: string]: number
-  }
-  const [tempSortingScores, setTempSortingScores] = useState<TempSortingScore>({});
+  
   const imgStyleDiv = {
     width: '200px',
     border: '2px solid #000',
@@ -90,79 +39,44 @@ function App() {
     return;
   }
 
-  // function getCardOrderVal(card: Card): number {
-  //   const scoreDict: {[Property in FolderNames]: number} = {
-  //     backgrounds: 1, jackets: 3, heads: 2, chains: 4, glasses: 5, caps: 6
-  //   };
-  //   return card.sortingScore ? card.sortingScore : scoreDict[card.folder as FolderNames];
-  // };
-
   async function settingReadBaseURI() {
-    const path = await dialog.showOpenDialog({
+    const pathObj = await dialog.showOpenDialog({
       properties: ['openDirectory']
     });
-    setReadBaseURI(path.filePaths[0]);
-    // @todo:critical write better error handling
-    let metaData: Card[] = JSON.parse(fs.readFileSync(`${path.filePaths[0]}/meta-data.json`).toString())
-      .map((pc: Card) => {
-        pc.imgB64 = `data:image/png;base64, ${fs.readFileSync(pc.fileLink).toString('base64')}`
-        if (pc.dependencies.compulsory && pc.dependencies.compulsory.length > 0) {
-          
-          const newCompulsoryDependencies = pc.dependencies.compulsory
-          .map(c => {
-            const fileLink = `${path.filePaths[0]}/${pc.folder}/${c.fileName}`;
-            c = {...c, fileLink, imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`};
-            return c;
-          });
-          pc.dependencies.compulsory = newCompulsoryDependencies;
-        }
-        return pc;
-      });
-    
-      setData(metaData);
+    const path = pathObj.filePaths[0] as string;
+    setReadBaseURI(path);
+    const dataLoader = new FSCardLoader({path, fs});
+    try {
+      dataLoader.load();
+    } catch (error) {
+      if (error.code === 'JPE') {
+        alert(error.message);
+      }
+      alert('Loading data failed');
+      return;
+    }
+    setData(dataLoader.getCards());
   }
 
   async function generateMetaData() {
-    const tempData = data.map(c => {
-      const item = {...c} as CardLike;
-      delete item.imgB64;
-      delete item.selected;
-      if (c.dependencies.compulsory && c.dependencies.compulsory.length > 0) {
-        c.dependencies.compulsory = c.dependencies.compulsory.map(d => {
-          const item = {...d};
-          delete item.imgB64;
-          delete item.selected;
-          delete item.dependencies;
-          return item;
-        });
-      }
-      return item;
-    });
-    fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(tempData));
+    const metaData = new MetaDataGenerator(data);
+    try {
+      metaData.run();
+    } catch (error) {
+      alert('Error generating metaData')
+    }
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, metaData.getMetaDataString());
     alert('Done');
   }
   function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();
     e.stopPropagation();
     setShowWIP(true);
-    console.log(data);
     return false;
   }
-  // @todo: support array of cards Card[]
   async function addDependencyToCard(c: Card) {
-    const selectedCards = data.filter(c => c.selected);
-    const item = {...c};
-    const numScore = tempSortingScores[item.fileName];
-    if (numScore) {
-      item.sortingScore = numScore;
-    }
-    for await (const card of selectedCards) {
-      if (card.dependencies.compulsory && card.dependencies.compulsory.length > 0) {
-        card.dependencies.compulsory.push(item as CardLike);
-      } else {
-        card.dependencies.compulsory = [item as CardLike];
-      }
-    }
+    const dependencyManager = new DependencyManager(data.filter(c => c.selected));
+    dependencyManager.addDependency(c);
     alert('Dependency added');
     setP(new Date().getTime());
   }
@@ -190,41 +104,21 @@ function App() {
       </div>
     )
   }
-  async function initialMetaData() {
-    const path = await dialog.showOpenDialog({
+  async function generateInitialMetaData() {
+    const pathObj = await dialog.showOpenDialog({
       properties: ['openDirectory']
     });
-    const chosenPath = path.filePaths[0] as string;
-    const updatedChosenPath = `./nftImages${chosenPath.split('/nftImages')[1]}`;
+    const path = pathObj.filePaths[0] as string;
+    const fileDataLoader = new InitialDataLoader(path, fs);
     try {
-      await bootUp(updatedChosenPath);
-      alert('ready');
+      fileDataLoader.run();
     } catch (error) {
       alert('Organise assets into the right folders');
       console.log(error);
     }
-  }
-  function filterJunkFiles(name: string): boolean {
-    return name != '.DS_Store'
-  }
-  
-  async function bootUp(folderLoc: string){
-    let dataObj: Card[] = [];
-    folderNames.forEach(folder => {
-      const names = fs.readdirSync(`${folderLoc}/${folder}`)
-        .filter(filterJunkFiles)
-        .map((name: string) => ({
-          folder,
-          // imgB64: `data:image/jpeg;base64, ${fs.readFileSync(`${folderLoc}/${folder}/${name}`).toString('base64')}`,
-          fileLink: `${folderLoc}/${folder}/${name}`,
-          selected: false,
-          fileName: name,
-          dependencies: {}
-        }));
-      dataObj = dataObj.concat(names);
-    });
-    
-    fs.writeFileSync(folderLoc+'/meta-data.json', JSON.stringify(dataObj));
+    const relativePath = new RelativePath(path);
+    fs.writeFileSync(relativePath.getPath()+'/meta-data.json', JSON.stringify(fileDataLoader.getData()));
+    alert('ready');
   }
   async function updateBulkSortingScore(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.code === 'Enter') {
@@ -244,7 +138,7 @@ function App() {
       {! readBaseURI ? (
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
-          <button style={{cursor: 'pointer'}} onClick={_ => initialMetaData()}>Generate initial metadata</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => generateInitialMetaData()}>Generate initial metadata</button>
         </>
       ) : 
       (
