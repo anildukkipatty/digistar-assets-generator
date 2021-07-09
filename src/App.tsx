@@ -59,13 +59,13 @@ function App() {
   }
 
   async function generateMetaData() {
-    const metaData = new MetaDataGenerator(data);
+    const metaDataGenerator = new MetaDataGenerator(data);
     try {
-      metaData.run();
+      metaDataGenerator.run();
     } catch (error) {
       alert('Error generating metaData')
     }
-    fs.writeFileSync(`${readBaseURI}/meta-data.json`, metaData.getMetaDataString());
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, metaDataGenerator.getMetaDataString());
     alert('Done');
   }
   function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
