@@ -109,15 +109,15 @@ function App() {
       properties: ['openDirectory']
     });
     const path = pathObj.filePaths[0] as string;
-    const fileDataLoader = new InitialDataLoader(path, fs);
+    const relativePath = new RelativePath(path);
+    const fileDataLoader = new InitialDataLoader(relativePath, fs);
     try {
       fileDataLoader.run();
     } catch (error) {
       alert('Organise assets into the right folders');
       console.log(error);
     }
-    const relativePath = new RelativePath(path);
-    fs.writeFileSync(relativePath.getPath()+'/meta-data.json', JSON.stringify(fileDataLoader.getData()));
+    fs.writeFileSync(relativePath.getPath()+'/meta-data.json', fileDataLoader.getDataString());
     alert('ready');
   }
   async function updateBulkSortingScore(event: React.KeyboardEvent<HTMLInputElement>) {

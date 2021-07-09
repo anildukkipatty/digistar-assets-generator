@@ -17,7 +17,7 @@ export interface CardLike {
   fileName: string;
   fileLink?: string;
   selected?: boolean;
-  dependencies?: CardDependency[];
+  dependencies?: CardDependency;
   imgB64?: string;
   sortingScore?: number;
 }
@@ -39,8 +39,8 @@ export class InitialDataLoader {
   private fs: any;
   private data: Card[] = [];
 
-  constructor(folderLocation: string, fs: any) {
-    this.relativePath = new RelativePath(folderLocation);
+  constructor(relativePath: RelativePath, fs: any) {
+    this.relativePath = relativePath;
     this.fs = fs;
   }
   run() {
@@ -68,6 +68,9 @@ export class InitialDataLoader {
   }
   getData() {
     return this.data;
+  }
+  getDataString() {
+    return JSON.stringify(this.data);
   }
 }
 
@@ -111,8 +114,8 @@ export class FSCardLoader {
 
 export class RelativePath {
   private path: string;
-  constructor(path: string) {
-    this.path = `./nftImages${path.split('/nftImages')[1]}`;
+  constructor(path: string, baseURI: string = '/nftImages') {
+    this.path = `.${baseURI}${path.split(baseURI)[1]}`;
   }
 
   getPath() {
