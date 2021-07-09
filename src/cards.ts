@@ -1,7 +1,3 @@
-export function filterJunkFiles(name: string): boolean {
-  return name != '.DS_Store'
-}
-
 export interface Card {
   folder: string;
   fileLink: string;
@@ -26,12 +22,16 @@ export interface CardLike {
   sortingScore?: number;
 }
 // type FolderNames = typeof folderNames[number];
+export type TempSortingScore = {
+  [Property: string]: number
+}
+
 export const folderNames = [
   'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
 ] as const;
 
-export type TempSortingScore = {
-  [Property: string]: number
+export function filterJunkFiles(name: string): boolean {
+  return name != '.DS_Store'
 }
 
 export class InitialDataLoader {
