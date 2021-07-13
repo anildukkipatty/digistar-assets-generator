@@ -203,6 +203,77 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
+  function randomGenerate() {
+    const noOfImages = 250;
+    const ar: string[][] = [];
+    folderNames
+      .forEach(folderName => {
+      for(let i = 0; i < noOfImages; i++) {
+        const card = getRandomItem(folderName);
+        if (ar[i] === undefined) ar[i] = [];
+        if (card !== undefined)
+          ar[i].push(card.fileLink);
+      }
+    })
+    const res = JSON.stringify({
+      generatedPath: `${readBaseURI}/outputs`,
+      files: ar
+    });
+    fs.writeFileSync('./composer.json', res);
+    setNoOfCombinations(ar.length)
+    setShowWIP(true);
+    if (os.platform() === WINDOWS) {
+      ipcRenderer.send('jimp-concat', 'ping');
+      return;
+    }
+    const python = spawn("./compose", [readBaseURI]);
+
+    python.stdout.on("data", (data: any) => {
+        console.log(`stdout: ${data}`);
+        _setOutput((x) => `${x} \n ${data.toString()}`);
+        setNoOfImagesGenerated(num => ++num);
+        try {
+          // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+        } catch (error) {
+          console.log('Error loading output file: ', data.toString());
+        }
+    });
+
+    python.stderr.on("data", (data: Buffer) => {
+        console.log(`stderr: ${data}`);
+        _setOutput(`${output} \n ${data.toString()}`);
+    });
+
+    python.on('error', (error: any) => {
+        console.log(`error: ${error.message}`);
+        _setOutput(`${output} \n ${error.message}`);
+    });
+
+    python.on("close", (code: unknown) => {
+        console.log(`child process exited with code ${code}`);
+        _setOutput((x) => `${x} \n ${code}`);
+    });
+  }
+  function getRandomItem(folderName: string) {
+    const itemsCount = data.filter(c => c.folder === folderName).length;
+    const randomIndex = getRandomNumber(itemsCount);
+    const item = data.filter(c => c.folder === folderName)[randomIndex];
+    if (item === undefined) {
+      if (folderName === 'heads') {
+        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+      }
+      if (folderName === 'jackets') {
+        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+      }
+      if (folderName === 'backgrounds') {
+        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+      }
+    }
+    return item;
+  }
+  function getRandomNumber(maxCount: number) {
+    return Math.floor(Math.random() * (maxCount + 1));
+  }
 
   return (
     <>
@@ -211,7 +282,10 @@ function App() {
         <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
       ) : 
       (
-        <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
+        <>
+          <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => randomGenerate()}>Random generate</button>
+        </>
       )
       }
       {readBaseURI}
