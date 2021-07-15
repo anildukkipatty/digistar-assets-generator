@@ -205,19 +205,21 @@ function App() {
   }
   function randomGenerate() {
     const noOfImages = 250;
-    const ar: string[][] = [];
+    const ar: Card[][] = [];
     folderNames
       .forEach(folderName => {
       for(let i = 0; i < noOfImages; i++) {
         const card = getRandomItem(folderName);
         if (ar[i] === undefined) ar[i] = [];
         if (card !== undefined)
-          ar[i].push(card.fileLink);
+          ar[i].push(card);
       }
     })
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
-      files: ar
+      files: expandDependencies(ar)
+        .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)))
+        .map(cardsList => cardsList.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
     setNoOfCombinations(ar.length)
@@ -273,6 +275,21 @@ function App() {
   }
   function getRandomNumber(maxCount: number) {
     return Math.floor(Math.random() * (maxCount + 1));
+  }
+  function expandDependencies(cardsArList: Card[][]) {
+    const newCardsArList: Card[][] = [];
+    for (const cardsList of cardsArList) {
+      let newCardsList: Card[] = [];
+      for (const c of cardsList) {
+        const compulsoryDep = c.dependencies.compulsory;
+        if (compulsoryDep && compulsoryDep.length > 0) {
+          newCardsList = [...compulsoryDep.map(c => c as Card)];
+        }
+        newCardsList.push(c);
+      }
+      newCardsArList.push(newCardsList);
+    }
+    return newCardsArList;
   }
 
   return (
