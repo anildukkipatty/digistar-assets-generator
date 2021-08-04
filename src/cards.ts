@@ -31,7 +31,7 @@ export const folderNames = [
 ] as const;
 
 export function filterJunkFiles(name: string): boolean {
-  return name != '.DS_Store'
+  return name !== '.DS_Store'
 }
 
 export class InitialDataLoader {
