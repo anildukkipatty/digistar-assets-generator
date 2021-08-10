@@ -116,6 +116,7 @@ function App() {
     } catch (error) {
       alert('Organise assets into the right folders');
       console.log(error);
+      return;
     }
     fs.writeFileSync(relativePath.getPath()+'/meta-data.json', fileDataLoader.getDataString());
     alert('ready');
