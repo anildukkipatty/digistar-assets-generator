@@ -60,8 +60,11 @@ function App() {
     setData(dataLoader.getCards());
   }
 
-  async function generateMetaData() {
-    const metaDataGenerator = new MetaDataGenerator(data);
+  async function generateMetaData(cards: Card[] | undefined = undefined) {
+    if (! cards) {
+      cards = data;
+    }
+    const metaDataGenerator = new MetaDataGenerator(cards);
     try {
       metaDataGenerator.run();
     } catch (error) {
@@ -125,7 +128,6 @@ function App() {
   }
   async function quickGenerateRules() {
     const jackets = data.filter(c => c.folder === 'jackets');
-    console.log(jackets);
     
     const whiteTshirt = jackets.filter(c => c.fileName === 't-white.png')[0];
     if (! whiteTshirt) {
@@ -135,37 +137,37 @@ function App() {
       return;
     }
     let dependencyManager = new DependencyManager(whiteTshirtApplicatnts(jackets));
-    dependencyManager.addDependency(whiteTshirt);
+    dependencyManager.addDependency({...whiteTshirt, sortingScore: 1.6});
     
     const applyPatch = prepareApplyPatch(jackets);
-    ['bomber-patch.png', 'cloak-back-patch.png', 'poncho-patch.png']
+    jackets.filter(c => c.fileName.indexOf('patch') >= 0)
+    .map(c => c.fileName)
     .forEach(applyPatch);
-    
-    setData(d => d.filter(c => c.fileName.indexOf('patch') < 0));
-    console.log(data);
+
+    const jacketsWithoutPatches = data.filter(c => c.fileName.indexOf('patch') < 0);
     
     jackets.forEach(c => {
       if (c.fileLink.indexOf('t-') >= 0) {
         c.sortingScore = 1.6;
       }
     })
-    await generateMetaData();
+    await generateMetaData(jacketsWithoutPatches);
   }
   function prepareApplyPatch(jackets: Card[]) {
     return function applyPatch(patchName: string) {
-      if (patchName === 'bomber-patch.png') {
+      if (patchName.indexOf('bomber') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('bomber') >= 0 && c.fileName.indexOf('patch') < 0)
         new DependencyManager(filteredJackets).addDependency(patch);
       }
-      if (patchName === 'cloak-back-patch.png') {
+      if (patchName.indexOf('cloak') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('cloak') >= 0 && c.fileName.indexOf('patch') < 0)
         new DependencyManager(filteredJackets).addDependency(patch);
       }
-      if (patchName === 'poncho-patch.png') {
+      if (patchName.indexOf('poncho') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('poncho') >= 0 && c.fileName.indexOf('patch') < 0)
