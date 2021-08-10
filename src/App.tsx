@@ -211,10 +211,15 @@ function App() {
       for(let i = 0; i < noOfImages; i++) {
         const card = getRandomItem(folderName);
         if (ar[i] === undefined) ar[i] = [];
-        if (card !== undefined)
+        
+        if (card !== undefined){
           ar[i].push(card);
+          if (folderName === 'backgrounds') {
+          }
+        }
       }
     })
+    
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
       files: expandDependencies(ar)
@@ -261,6 +266,7 @@ function App() {
     const randomIndex = getRandomNumber(itemsCount);
     const item = data.filter(c => c.folder === folderName)[randomIndex];
     if (item === undefined) {
+      
       if (folderName === 'heads') {
         return data.filter(c => c.folder === folderName)[randomIndex - 1];
       }
@@ -274,22 +280,23 @@ function App() {
     return item;
   }
   function getRandomNumber(maxCount: number) {
+    // random between 0-maxCount
     return Math.floor(Math.random() * (maxCount + 1));
   }
-  function expandDependencies(cardsArList: Card[][]) {
-    const newCardsArList: Card[][] = [];
-    for (const cardsList of cardsArList) {
-      let newCardsList: Card[] = [];
-      for (const c of cardsList) {
+  function expandDependencies(cardsContainerArr: Card[][]) {
+    const newCardsContainerArr: Card[][] = [];
+    for (const cardsContainer of cardsContainerArr) {
+      let newCardsContainer: Card[] = [];
+      for (const c of cardsContainer) {
         const compulsoryDep = c.dependencies.compulsory;
         if (compulsoryDep && compulsoryDep.length > 0) {
-          newCardsList = [...compulsoryDep.map(c => c as Card)];
+          newCardsContainer = [...newCardsContainer, ...compulsoryDep.map(c => c as Card), c];
         }
-        newCardsList.push(c);
+        newCardsContainer.push(c);
       }
-      newCardsArList.push(newCardsList);
+      newCardsContainerArr.push(newCardsContainer);
     }
-    return newCardsArList;
+    return newCardsContainerArr;
   }
 
   return (
