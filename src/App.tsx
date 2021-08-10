@@ -53,6 +53,8 @@ function App() {
         alert(error.message);
       }
       alert('Loading data failed');
+      console.log(error);
+      
       return;
     }
     setData(dataLoader.getCards());
@@ -121,6 +123,62 @@ function App() {
     fs.writeFileSync(relativePath.getPath()+'/meta-data.json', fileDataLoader.getDataString());
     alert('ready');
   }
+  async function quickGenerateRules() {
+    const jackets = data.filter(c => c.folder === 'jackets');
+    console.log(jackets);
+    
+    const whiteTshirt = jackets.filter(c => c.fileName === 't-white.png')[0];
+    if (! whiteTshirt) {
+      alert('White tShirt missing');
+      console.log(whiteTshirt);
+      
+      return;
+    }
+    let dependencyManager = new DependencyManager(whiteTshirtApplicatnts(jackets));
+    dependencyManager.addDependency(whiteTshirt);
+    
+    const applyPatch = prepareApplyPatch(jackets);
+    ['bomber-patch.png', 'cloak-back-patch.png', 'poncho-patch.png']
+    .forEach(applyPatch);
+    
+    setData(d => d.filter(c => c.fileName.indexOf('patch') < 0));
+    console.log(data);
+    
+    jackets.forEach(c => {
+      if (c.fileLink.indexOf('t-') >= 0) {
+        c.sortingScore = 1.6;
+      }
+    })
+    await generateMetaData();
+  }
+  function prepareApplyPatch(jackets: Card[]) {
+    return function applyPatch(patchName: string) {
+      if (patchName === 'bomber-patch.png') {
+        const patch = jackets.filter(c => c.fileName === patchName)[0];
+        if (! patch) return;
+        const filteredJackets = jackets.filter(c => c.fileName.indexOf('bomber') >= 0 && c.fileName.indexOf('patch') < 0)
+        new DependencyManager(filteredJackets).addDependency(patch);
+      }
+      if (patchName === 'cloak-back-patch.png') {
+        const patch = jackets.filter(c => c.fileName === patchName)[0];
+        if (! patch) return;
+        const filteredJackets = jackets.filter(c => c.fileName.indexOf('cloak') >= 0 && c.fileName.indexOf('patch') < 0)
+        new DependencyManager(filteredJackets).addDependency(patch);
+      }
+      if (patchName === 'poncho-patch.png') {
+        const patch = jackets.filter(c => c.fileName === patchName)[0];
+        if (! patch) return;
+        const filteredJackets = jackets.filter(c => c.fileName.indexOf('poncho') >= 0 && c.fileName.indexOf('patch') < 0)
+        new DependencyManager(filteredJackets).addDependency(patch);
+      }
+    };
+  }
+  function whiteTshirtApplicatnts(jackets: Card[]) {
+    return jackets.filter(c => {
+      return (c.fileName.indexOf('bomber') >= 0 || c.fileName.indexOf('hoodie') >= 0 || c.fileName.indexOf('leather') >= 0 ||
+      c.fileName.indexOf('poncho') >= 0) && c.fileName.indexOf('patch') < 0
+    })
+  }
   async function updateBulkSortingScore(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.code === 'Enter') {
       const score = event.currentTarget.value;
@@ -145,6 +203,7 @@ function App() {
       (
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => quickGenerateRules()}>Quick generate rules</button>
           <input placeholder="Bulk update sorting score" type="number" onKeyPress={e => updateBulkSortingScore(e)} />
         </>
       )
