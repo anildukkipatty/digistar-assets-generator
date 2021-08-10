@@ -159,19 +159,19 @@ function App() {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('bomber') >= 0 && c.fileName.indexOf('patch') < 0)
-        new DependencyManager(filteredJackets).addDependency(patch);
+        new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
       }
       if (patchName.indexOf('cloak') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('cloak') >= 0 && c.fileName.indexOf('patch') < 0)
-        new DependencyManager(filteredJackets).addDependency(patch);
+        new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
       }
       if (patchName.indexOf('poncho') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('poncho') >= 0 && c.fileName.indexOf('patch') < 0)
-        new DependencyManager(filteredJackets).addDependency(patch);
+        new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
       }
     };
   }
