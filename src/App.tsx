@@ -36,6 +36,7 @@ interface Card {
   dependencies: CardDependency;
   imgB64?: string;
   sortingScore?: number;
+  repeat?: number;
 }
 interface CardDependency {
   compulsory?: CardLike[];
@@ -203,31 +204,34 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
-  function randomGenerate() {
+  async function randomGenerate() {
     const noOfImages = 250;
-    const ar: Card[][] = [];
-    folderNames
-      .forEach(folderName => {
-      for(let i = 0; i < noOfImages; i++) {
+    const imageContainerList: Card[][] = new Array(noOfImages);
+    
+    await prefillWithRepeats(imageContainerList);
+
+    for(let i = 0; i < noOfImages; i++) {
+      const foldersToFillFrom: string[] = folderNames as unknown as string[];
+      foldersToFillFrom.forEach(folderName => {
         const card = getRandomItem(folderName);
-        if (ar[i] === undefined) ar[i] = [];
-        
-        if (card !== undefined){
-          ar[i].push(card);
-          if (folderName === 'backgrounds') {
+          if (imageContainerList[i] === undefined) imageContainerList[i] = [];
+          
+          if (card !== undefined){
+            imageContainerList[i].push(card);
+            if (folderName === 'backgrounds') {
+            }
           }
-        }
-      }
-    })
+      })
+    }
     
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
-      files: expandDependencies(ar)
+      files: expandDependencies(imageContainerList)
         .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)))
         .map(cardsList => cardsList.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
-    setNoOfCombinations(ar.length)
+    setNoOfCombinations(imageContainerList.length)
     setShowWIP(true);
     if (os.platform() === WINDOWS) {
       ipcRenderer.send('jimp-concat', 'ping');
@@ -261,20 +265,45 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
+  async function prefillWithRepeats(imageContainerList: Card[][]) {
+    folderNames.forEach(folder => {
+      const filesWithRepeat = data.filter(c => c.folder === folder && c.repeat && c.repeat > 0);
+      const usedIndexes: number[] = [];
+      filesWithRepeat.forEach(c => {
+        if (!c.repeat) return;
+        for(let ii = 0; ii < c.repeat; ii++) {
+          let randomIndex = getRandomNumber(imageContainerList.length - 1);
+          while (usedIndexes.indexOf(randomIndex) >= 0) {
+            randomIndex = getRandomNumber(imageContainerList.length - 1);
+          }
+          usedIndexes.push(randomIndex);
+          if (!imageContainerList[randomIndex]) {
+            imageContainerList[randomIndex] = [];
+          }
+          imageContainerList[randomIndex].push(c);
+        }
+      });
+    });
+  }
   function getRandomItem(folderName: string) {
-    const itemsCount = data.filter(c => c.folder === folderName).length;
+    const itemsCount = data
+      .filter(c => c.folder === folderName)
+      .filter(c => !(c.repeat && c.repeat > 0))
+      .length;
     const randomIndex = getRandomNumber(itemsCount);
-    const item = data.filter(c => c.folder === folderName)[randomIndex];
+    const item = data
+      .filter(c => c.folder === folderName)
+      .filter(c => !(c.repeat && c.repeat > 0))[randomIndex];
     if (item === undefined) {
       
       if (folderName === 'heads') {
-        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
       }
       if (folderName === 'jackets') {
-        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
       }
       if (folderName === 'backgrounds') {
-        return data.filter(c => c.folder === folderName)[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
       }
     }
     return item;
@@ -321,7 +350,8 @@ function App() {
               {data.filter(obj => obj.folder === folder).map((obj, i) => {
                 return (
                   <div key={i} onClick={_ => imageSelected(obj)} style={{...imgStyleDiv}}>
-                    <span>{obj.selected ? 'SELECTED' : ''}</span>
+                    <span>{obj.selected ? `SELECTED ${obj.repeat}` : ''}</span>
+                    {obj.selected ? <input onChange={e => obj.repeat = parseInt(e.target.value)} onClick={e => {e.stopPropagation();}} /> : ''}
                     <img style={imgStyle} alt="" src={obj.imgB64} />
                   </div>
                 )
