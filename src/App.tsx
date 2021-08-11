@@ -183,7 +183,7 @@ function App() {
       if (patchName.indexOf('vest') >= 0) {
         const patch = jackets.filter(c => c.fileName === patchName)[0];
         if (! patch) return;
-        const filteredJackets = jackets.filter(c => c.fileName.indexOf('vest') >= 0 && c.fileName.indexOf('vest') < 0)
+        const filteredJackets = jackets.filter(c => c.fileName.indexOf('vest') >= 0 && c.fileName.indexOf('patch') < 0)
         new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
       }
     };
