@@ -60,9 +60,12 @@ function App() {
     setData(dataLoader.getCards());
   }
 
-  async function generateMetaData(cards: Card[] | undefined = undefined) {
+  async function generateMetaData(cards: Card[] | undefined = undefined, metaDataPath: string|null = null) {
     if (! cards) {
       cards = data;
+    }
+    if (!metaDataPath) {
+      metaDataPath = readBaseURI;
     }
     const metaDataGenerator = new MetaDataGenerator(cards);
     try {
@@ -70,7 +73,7 @@ function App() {
     } catch (error) {
       alert('Error generating metaData')
     }
-    fs.writeFileSync(`${readBaseURI}/meta-data.json`, metaDataGenerator.getMetaDataString());
+    fs.writeFileSync(`${metaDataPath}/meta-data.json`, metaDataGenerator.getMetaDataString());
     alert('Done');
   }
   function showAddDependency(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
@@ -109,11 +112,13 @@ function App() {
       </div>
     )
   }
-  async function generateInitialMetaData() {
-    const pathObj = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    });
-    const path = pathObj.filePaths[0] as string;
+  async function generateInitialMetaData(path: string | undefined = undefined) {
+    if (!path) {
+      const pathObj = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+      });
+      path = pathObj.filePaths[0] as string;
+    }
     const relativePath = new RelativePath(path);
     const fileDataLoader = new InitialDataLoader(relativePath, fs);
     try {
@@ -126,8 +131,10 @@ function App() {
     fs.writeFileSync(relativePath.getPath()+'/meta-data.json', fileDataLoader.getDataString());
     alert('ready');
   }
-  async function quickGenerateRules() {
-    const jackets = data.filter(c => c.folder === 'jackets');
+  async function quickGenerateRules(cards: Card[] | undefined = undefined, path: string|null = null) {
+
+    const jackets = !cards ? data.filter(c => c.folder === 'jackets') : cards.filter(c => c.folder === 'jackets');
+    console.log('jackets', jackets);
     
     const whiteTshirt = jackets.filter(c => c.fileName === 't-white.png')[0];
     if (! whiteTshirt) {
@@ -144,14 +151,14 @@ function App() {
     .map(c => c.fileName)
     .forEach(applyPatch);
 
-    const jacketsWithoutPatches = data.filter(c => c.fileName.indexOf('patch') < 0);
+    const jacketsWithoutPatches = !cards ? data.filter(c => c.fileName.indexOf('patch') < 0) : cards.filter(c => c.fileName.indexOf('patch') < 0);
     
     jackets.forEach(c => {
       if (c.fileLink.indexOf('t-') >= 0) {
         c.sortingScore = 1.6;
       }
     })
-    await generateMetaData(jacketsWithoutPatches);
+    await generateMetaData(jacketsWithoutPatches, path);
   }
   function prepareApplyPatch(jackets: Card[]) {
     return function applyPatch(patchName: string) {
@@ -173,13 +180,49 @@ function App() {
         const filteredJackets = jackets.filter(c => c.fileName.indexOf('poncho') >= 0 && c.fileName.indexOf('patch') < 0)
         new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
       }
+      if (patchName.indexOf('vest') >= 0) {
+        const patch = jackets.filter(c => c.fileName === patchName)[0];
+        if (! patch) return;
+        const filteredJackets = jackets.filter(c => c.fileName.indexOf('vest') >= 0 && c.fileName.indexOf('vest') < 0)
+        new DependencyManager(filteredJackets).addDependency({...patch, sortingScore: 1.5});
+      }
     };
   }
   function whiteTshirtApplicatnts(jackets: Card[]) {
     return jackets.filter(c => {
       return (c.fileName.indexOf('bomber') >= 0 || c.fileName.indexOf('hoodie') >= 0 || c.fileName.indexOf('leather') >= 0 ||
-      c.fileName.indexOf('poncho') >= 0) && c.fileName.indexOf('patch') < 0
+      c.fileName.indexOf('poncho') >= 0 || c.fileName.indexOf('vest') >= 0) && c.fileName.indexOf('patch') < 0
     })
+  }
+  async function express() {
+    const pathObj = await dialog.showOpenDialog({
+      properties: ['openDirectory', 'multiSelections']
+    });
+    const paths = pathObj.filePaths as string[];
+    console.log(paths);
+    
+    paths.forEach(async path => {
+      await generateInitialMetaData(path);
+      const cards = loadCardData(path);
+      await quickGenerateRules(cards, path);
+    })
+  }
+  function loadCardData(path: string) {
+    setReadBaseURI(path);
+    const dataLoader = new FSCardLoader({path, fs});
+    try {
+      dataLoader.load();
+    } catch (error) {
+      if (error.code === 'JPE') {
+        alert(error.message);
+      }
+      alert('Loading data failed');
+      console.log(error);
+      return;
+    }
+    const cards = dataLoader.getCards();;
+    setData(cards);
+    return cards;
   }
   async function updateBulkSortingScore(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.code === 'Enter') {
@@ -200,6 +243,7 @@ function App() {
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => settingReadBaseURI()}>Open assets</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateInitialMetaData()}>Generate initial metadata</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => express()}>Express</button>
         </>
       ) : 
       (
