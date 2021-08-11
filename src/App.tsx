@@ -320,8 +320,9 @@ function App() {
         const compulsoryDep = c.dependencies.compulsory;
         if (compulsoryDep && compulsoryDep.length > 0) {
           newCardsContainer = [...newCardsContainer, ...compulsoryDep.map(c => c as Card), c];
+        } else {
+          newCardsContainer.push(c);
         }
-        newCardsContainer.push(c);
       }
       newCardsContainerArr.push(newCardsContainer);
     }
