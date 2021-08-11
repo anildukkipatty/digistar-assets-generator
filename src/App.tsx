@@ -351,7 +351,7 @@ function App() {
               {data.filter(obj => obj.folder === folder).map((obj, i) => {
                 return (
                   <div key={i} onClick={_ => imageSelected(obj)} style={{...imgStyleDiv}}>
-                    <span>{obj.selected ? `SELECTED ${obj.repeat}` : ''}</span>
+                    <span>{obj.selected ? `SELECTED` : ''}</span>
                     {obj.selected ? <input onChange={e => obj.repeat = parseInt(e.target.value)} onClick={e => {e.stopPropagation();}} /> : ''}
                     <img style={imgStyle} alt="" src={obj.imgB64} />
                   </div>
