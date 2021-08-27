@@ -83,7 +83,7 @@ function App() {
     return false;
   }
   async function addDependencyToCard(c: Card) {
-    const dependencyManager = new DependencyManager(data.filter(c => c.selected));
+    const dependencyManager = new DependencyManager(data.filter(c => c.selected), tempSortingScores);
     dependencyManager.addDependency(c);
     alert('Dependency added');
     setP(new Date().getTime());
