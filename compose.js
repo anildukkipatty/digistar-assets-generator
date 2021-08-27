@@ -7,11 +7,15 @@ async function compose() {
 	try {
 		data = JSON.parse(fs.readFileSync('composer.json').toString());
 		
+		let fileIndex = 0;
+
 		for await (filesList of data.files) {
 			const bgLayer = await whiteJimpImg(2140, 2140);
-			const res = await composeImageFromFiles(filesList, bgLayer, data.generatedPath);
+			const [res, jsonFile] = await composeImageFromFiles(filesList, bgLayer, data.generatedPath, fileIndex);
 			await res.img.writeAsync(res.fileLink);
+			fs.writeFileSync(jsonFile.fileLink, JSON.stringify(jsonFile));
 			console.log(res.fileLink);
+			fileIndex++;
 		}
 
 	} catch (error) {
@@ -20,7 +24,7 @@ async function compose() {
 	}
 		
 }
-async function composeImageFromFiles(fileArr, bgLayer, outputPath) {
+async function composeImageFromFiles(fileArr, bgLayer, outputPath, fileIndex) {
   if (fileArr.length <= 0) return;
 			let img = Object.create(bgLayer);
 			for await (file of fileArr) {
@@ -31,12 +35,28 @@ async function composeImageFromFiles(fileArr, bgLayer, outputPath) {
 				}
 				img = await img.composite(newImg, 0, 0);
 			}
-			let name = getComposedFileName(fileArr);
-			return {
+			// let name = getComposedFileName(fileArr);
+			const name = `${new Date().getTime()}${fileIndex}`;
+			return [{
 				fileLink: `${outputPath}/${name}.png`,
 				fileName: name,
 				img: img
+			},
+			{
+				name,
+				description: 'LudoLabs Baby!',
+				attributes: getAttributes(fileArr),
+				fileLink: `${outputPath}/${name}.json`
 			}
+		]
+}
+function getAttributes(fileArr) {
+	return fileArr.map(file => {
+		const tokenised = file.split('/');
+		const obj = {};
+		obj[tokenised[tokenised.length - 2]] = tokenised[tokenised.length - 1].split('.png')[0];
+		return obj
+	})
 }
 async function whiteJimpImg(width, height) {
 	return new Promise((resolve, reject) => {
