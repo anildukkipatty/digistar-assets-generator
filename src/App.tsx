@@ -48,7 +48,7 @@ function App() {
     const dataLoader = new FSCardLoader({path, fs});
     try {
       dataLoader.load();
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'JPE') {
         alert(error.message);
       }
@@ -212,7 +212,7 @@ function App() {
     const dataLoader = new FSCardLoader({path, fs});
     try {
       dataLoader.load();
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'JPE') {
         alert(error.message);
       }
