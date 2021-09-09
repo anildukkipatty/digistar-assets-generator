@@ -317,16 +317,57 @@ function App() {
     for (const cardsContainer of cardsContainerArr) {
       let newCardsContainer: Card[] = [];
       for (const c of cardsContainer) {
-        const compulsoryDep = c.dependencies.compulsory;
-        if (compulsoryDep && compulsoryDep.length > 0) {
-          newCardsContainer = [...newCardsContainer, ...compulsoryDep.map(c => c as Card), c];
-        } else {
-          newCardsContainer.push(c);
+        // branch based on folder of the dependants
+        switch (c.folder) {
+          case 'jackets':
+            newCardsContainer = jacketsExpandDependencies(c);
+          break;
+          
+          case 'caps':
+            newCardsContainer = capsExpandedDependencies(c, cardsContainer);
+          break;
+
+          default:
+            newCardsContainer = [c];
+          break
         }
+        
       }
       newCardsContainerArr.push(newCardsContainer);
     }
     return newCardsContainerArr;
+  }
+  function jacketsExpandDependencies(c: Card) {
+    let newCardsContainer: Card[] = [];
+    const compulsoryDep = c.dependencies.compulsory;
+    if (compulsoryDep && compulsoryDep.length > 0) {
+      newCardsContainer = [...newCardsContainer, ...compulsoryDep.map(c => c as Card), c];
+    } else {
+      newCardsContainer.push(c);
+    }
+    return newCardsContainer;
+  }
+  function capsExpandedDependencies(c: Card, cardsContainer: Card[]) {
+    const background = cardsContainer.filter(c => c.folder === 'backgrounds')[0];
+    if (! background) return [c];
+
+    let newCardsContainer: Card[] = [];
+    const dependencies = c.dependencies.atleastone;
+    if (dependencies && dependencies.length > 0) {
+      const fileLink = `${readBaseURI}/cap patches/${background.fileName}`;
+      const capPatch: Card = {
+        fileName: background.fileName,
+        fileLink: fileLink,
+        folder: 'cap patches',
+        imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`,
+        dependencies: {},
+        selected: false
+      };
+      newCardsContainer = [...newCardsContainer, capPatch, c];
+    } else {
+      newCardsContainer.push(c);
+    }
+    return newCardsContainer;
   }
 
   return (
