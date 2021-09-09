@@ -58,6 +58,16 @@ const folderNames = [
 const WINDOWS = 'win32';
 const MACOS = 'darwin';
 type FolderNames = typeof folderNames[number];
+class RelativePath {
+  private path: string;
+  constructor(path: string, baseURI: string = '/nftImages') {
+    this.path = `.${baseURI}${path.split(baseURI)[1]}`;
+  }
+
+  getPath() {
+    return this.path;
+  }
+}
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
@@ -367,9 +377,10 @@ function App() {
     const dependencies = c.dependencies.atleastone;
     if (dependencies && dependencies.length > 0) {
       const fileLink = `${readBaseURI}/cap patches/${background.fileName}`;
+      const relativePathFileLink = new RelativePath(fileLink).getPath();
       const capPatch: Card = {
         fileName: background.fileName,
-        fileLink: fileLink,
+        fileLink: relativePathFileLink,
         folder: 'cap patches',
         imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`,
         dependencies: {},
