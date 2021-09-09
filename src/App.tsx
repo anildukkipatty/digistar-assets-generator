@@ -402,7 +402,30 @@ function App() {
     // loop through all json files
     // {itemName: val}
     // write to a file
-    console.log(fs.readdirSync(readBaseURI)+'/outputs');
+    const jsonFileNames = fs.readdirSync(readBaseURI+'/outputs')
+      .filter((name: string) => name.indexOf('.json') >= 0)
+
+    const statsObj = jsonFileNames.map((name: string) => JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/${name}`)))
+      .map((obj: any) => obj.attributes)
+      .reduce((res: any, img: string[]) => {
+        if (!res) res = {};
+        img.forEach((attr: any) => {
+          let fileName = attr[Object.keys(attr)[0]];
+          if (Object.keys(attr)[0].indexOf('cap patches') >= 0) {
+            fileName += ' cap patch';
+          }
+          if (!res[fileName]) res[fileName] = 0;
+          res[fileName] += 1;
+        })
+        return res;
+      }, {});
+    const csvObj: any[][] = [['asset name', 'percentage']];
+    Object.keys(statsObj).forEach((keyName: string) => {
+      csvObj.push([keyName, (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
+    });
+    const csvString = csvObj.map(o => o.join(',')).join('\n');
+    fs.writeFileSync(`${readBaseURI}/outputs/stats.csv`, csvString);
+    alert('Done');
   }
 
   return (
