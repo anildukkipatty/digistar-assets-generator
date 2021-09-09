@@ -232,22 +232,35 @@ function App() {
     alert('yay');
   }
   function capPatches() {
-    const newData = data.map(c => {
-      if (c.folder === 'backgrounds') {
-        const compulsoryDependencies = c.dependencies.compulsory || [];
-        if (readBaseURI == null) return c;
-        const relativePath = new RelativePath(readBaseURI);
-        compulsoryDependencies.push({
-          fileName: c.fileName,
-          folder: 'cap patches',
-          fileLink: `${relativePath.getPath()}/cap patches/${c.fileName}`,
-          sortingScore: 1.3
-        });
-        c.dependencies.compulsory = compulsoryDependencies;
+    // const newData = data.map(c => {
+    //   if (c.folder === 'backgrounds') {
+    //     const compulsoryDependencies = c.dependencies.compulsory || [];
+    //     if (readBaseURI == null) return c;
+    //     const relativePath = new RelativePath(readBaseURI);
+    //     compulsoryDependencies.push({
+    //       fileName: c.fileName,
+    //       folder: 'cap patches',
+    //       fileLink: `${relativePath.getPath()}/cap patches/${c.fileName}`,
+    //       sortingScore: 1.3
+    //     });
+    //     c.dependencies.compulsory = compulsoryDependencies;
+    //   }
+    //   return c;
+    // })
+    // setData(_data => newData);
+    // alert('yay');
+    const defaultBackground = data.filter(c => c.folder === 'backgrounds')[0];
+    delete defaultBackground['imgB64'];
+    const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`));
+    const newData = cards.map(c => {
+      if (c.folder === 'caps') {
+        c.dependencies.atleastone = [
+          defaultBackground
+        ];
       }
       return c;
     })
-    setData(_data => newData);
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(newData));
     alert('yay');
   }
   async function express() {
