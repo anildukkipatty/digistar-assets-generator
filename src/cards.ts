@@ -99,7 +99,14 @@ export class FSCardLoader {
           .map(c => {
             const relativePath = new RelativePath(this.path);
             const fileLink = `${relativePath.getPath()}/${pc.folder}/${c.fileName}`;
-            c = {...c, fileLink, imgB64: `data:image/png;base64, ${this.fs.readFileSync(fileLink).toString('base64')}`};
+            try {
+              c = {...c, fileLink, imgB64: `data:image/png;base64, ${this.fs.readFileSync(fileLink).toString('base64')}`};
+            } catch (error) {
+              console.log(fileLink);
+              console.log(this.path);
+              
+              throw error
+            }
             return c;
           });
           pc.dependencies.compulsory = newCompulsoryDependencies;

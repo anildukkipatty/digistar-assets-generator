@@ -194,6 +194,27 @@ function App() {
       c.fileName.indexOf('poncho') >= 0 || c.fileName.indexOf('vest') >= 0) && c.fileName.indexOf('patch') < 0
     })
   }
+  function applyRuleSheet() {
+    const existingRules = JSON.parse(fs.readFileSync('rules.json'));
+    const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
+    .map((c: Card) => {
+      if (c.fileName in existingRules) {
+        c.dependencies.compulsory = existingRules[c.fileName];
+      }
+      return c;
+    })
+    .map((c: Card) => {
+      if (c.fileName.toLocaleLowerCase().indexOf('tee') >= 0) {
+        c.sortingScore = 1.6;
+      }
+      return c;
+    })
+    .filter((c: Card) => {
+      return (c.fileName.toLocaleLowerCase().indexOf('patch') < 0 && c.fileName.toLocaleLowerCase().indexOf('back.png') < 0)
+    });
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(cards));
+    alert('yay');
+  }
   function createRuleSheet() {
     const existingRules = JSON.parse(fs.readFileSync('rules.json'));
     const rules = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
@@ -205,8 +226,26 @@ function App() {
       if (! res) res = existingRules;
       res[cur.fileName] = cur.dependencies.compulsory;
       return res;
-    }, {})
+    }, existingRules)
     fs.writeFileSync('rules.json', JSON.stringify(rules));
+    alert('yay');
+  }
+  function capPatches() {
+    const newData = data.map(c => {
+      if (c.folder === 'backgrounds') {
+        const compulsoryDependencies = c.dependencies.compulsory || [];
+        if (readBaseURI == null) return c;
+        const relativePath = new RelativePath(readBaseURI);
+        compulsoryDependencies.push({
+          fileName: c.fileName,
+          folder: 'cap patches',
+          fileLink: `${relativePath.getPath()}/cap patches/${c.fileName}`,
+        });
+        c.dependencies.compulsory = compulsoryDependencies;
+      }
+      return c;
+    })
+    setData(_data => newData);
     alert('yay');
   }
   async function express() {
@@ -266,6 +305,8 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
           <button style={{cursor: 'pointer'}} onClick={_ => quickGenerateRules()}>Quick generate rules</button>
           <button style={{cursor: 'pointer'}} onClick={_ => createRuleSheet()}>create rulesheet</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => applyRuleSheet()}>apply rulesheet</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => capPatches()}>cap patches</button>
           <input placeholder="Bulk update sorting score" type="number" onKeyPress={e => updateBulkSortingScore(e)} />
         </>
       )
