@@ -129,7 +129,7 @@ function App() {
           
           const newCompulsoryDependencies = pc.dependencies.compulsory
           .map(c => {
-            const fileLink = `${path.filePaths[0]}/${pc.folder}/${c.fileName}`;
+            const fileLink = `${path.filePaths[0]}/${c.folder}/${c.fileName}`;
             c = {...c, fileLink, imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`};
             return c;
           });
