@@ -200,7 +200,8 @@ function App() {
     .map((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
       if (Object.keys(existingRules).indexOf(lowerCaseFileName) >= 0) {
-        c.dependencies.compulsory = existingRules[lowerCaseFileName];
+        c.dependencies.compulsory = existingRules[lowerCaseFileName]
+          .map((c: Card) => new RelativePath(c.fileLink).getPath());
       }
       return c;
     })
