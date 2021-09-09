@@ -198,8 +198,9 @@ function App() {
     const existingRules = JSON.parse(fs.readFileSync('rules.json'));
     const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
     .map((c: Card) => {
-      if (c.fileName in existingRules) {
-        c.dependencies.compulsory = existingRules[c.fileName];
+      const lowerCaseFileName = c.fileName.toLowerCase();
+      if (Object.keys(existingRules).indexOf(lowerCaseFileName) >= 0) {
+        c.dependencies.compulsory = existingRules[lowerCaseFileName];
       }
       return c;
     })
@@ -240,6 +241,7 @@ function App() {
           fileName: c.fileName,
           folder: 'cap patches',
           fileLink: `${relativePath.getPath()}/cap patches/${c.fileName}`,
+          sortingScore: 1.3
         });
         c.dependencies.compulsory = compulsoryDependencies;
       }
