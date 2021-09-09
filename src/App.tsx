@@ -140,7 +140,14 @@ function App() {
           const newCompulsoryDependencies = pc.dependencies.compulsory
           .map(c => {
             const fileLink = `${path.filePaths[0]}/${c.folder}/${c.fileName}`;
-            c = {...c, fileLink, imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`};
+            try {
+              c = {...c, fileLink, imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`};
+            } catch (error) {
+              console.log(pc);
+              console.log(c);
+              
+              throw error;
+            }
             return c;
           });
           pc.dependencies.compulsory = newCompulsoryDependencies;
@@ -391,6 +398,12 @@ function App() {
     }
     return exportedDependencies;
   }
+  function generateStats() {
+    // loop through all json files
+    // {itemName: val}
+    // write to a file
+    console.log(fs.readdirSync(readBaseURI)+'/outputs');
+  }
 
   return (
     <>
@@ -402,6 +415,7 @@ function App() {
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
           <button style={{cursor: 'pointer'}} onClick={_ => randomGenerate()}>Random generate</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
         </>
       )
       }
