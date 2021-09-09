@@ -151,17 +151,26 @@ function App() {
     let finalOutput: Card[][] = [];
     recurbaby(0, files.filter(ar => ar.length > 0), [], finalOutput);
     finalOutput = finalOutput
-      .map(cardsList => {
-        cardsList.forEach(card => {
-          if (card.dependencies.compulsory && card.dependencies.compulsory.length > 0) {
-            card.dependencies.compulsory.forEach(c => {
-              console.log(c);
-              
-              cardsList.push(c as Card);
-            });
+      .map(image => {
+        image.forEach(card => {
+          let dependencies = [];
+          switch (card.folder) {
+            case 'jackets':
+              dependencies = jacketsExpandDependencies(card);
+              image = [...image, ...dependencies];
+            break;
+            
+            case 'caps':
+              console.log('CAPS CASE');
+              dependencies = capsExpandedDependencies(card, image);
+              image = [...image, ...dependencies];
+            break;
+  
+            default:
+            break
           }
         });
-        return cardsList;
+        return image;
       })
       .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)));
     
@@ -312,46 +321,49 @@ function App() {
     // random between 0-maxCount
     return Math.floor(Math.random() * (maxCount + 1));
   }
-  function expandDependencies(cardsContainerArr: Card[][]) {
-    const newCardsContainerArr: Card[][] = [];
-    for (const cardsContainer of cardsContainerArr) {
-      let newCardsContainer: Card[] = [];
-      for (const c of cardsContainer) {
+  function expandDependencies(imagesList: Card[][]) {
+    const newImagesList: Card[][] = [];
+    for (const image of imagesList) {
+      let newImage: Card[] = [];
+      
+      for (const c of image) {
         // branch based on folder of the dependants
+        let dependencies = [];
         switch (c.folder) {
           case 'jackets':
-            newCardsContainer = jacketsExpandDependencies(c);
+            dependencies = jacketsExpandDependencies(c);
+            newImage = [...newImage, ...dependencies, c];
           break;
           
           case 'caps':
-            newCardsContainer = capsExpandedDependencies(c, cardsContainer);
+            console.log('CAPS CASE');
+            dependencies = capsExpandedDependencies(c, image);
+            newImage = [...newImage, ...dependencies, c];
           break;
 
           default:
-            newCardsContainer = [c];
+            newImage = [...newImage, c];
           break
         }
         
       }
-      newCardsContainerArr.push(newCardsContainer);
+      newImagesList.push(newImage);
     }
-    return newCardsContainerArr;
+    return newImagesList;
   }
   function jacketsExpandDependencies(c: Card) {
-    let newCardsContainer: Card[] = [];
+    let dependencies: Card[] = [];
     const compulsoryDep = c.dependencies.compulsory;
     if (compulsoryDep && compulsoryDep.length > 0) {
-      newCardsContainer = [...newCardsContainer, ...compulsoryDep.map(c => c as Card), c];
-    } else {
-      newCardsContainer.push(c);
+      dependencies = [...dependencies, ...compulsoryDep.map(c => c as Card)];
     }
-    return newCardsContainer;
+    return dependencies;
   }
   function capsExpandedDependencies(c: Card, cardsContainer: Card[]) {
     const background = cardsContainer.filter(c => c.folder === 'backgrounds')[0];
-    if (! background) return [c];
+    if (! background) return [];
 
-    let newCardsContainer: Card[] = [];
+    let exportedDependencies: Card[] = [];
     const dependencies = c.dependencies.atleastone;
     if (dependencies && dependencies.length > 0) {
       const fileLink = `${readBaseURI}/cap patches/${background.fileName}`;
@@ -361,13 +373,12 @@ function App() {
         folder: 'cap patches',
         imgB64: `data:image/png;base64, ${fs.readFileSync(fileLink).toString('base64')}`,
         dependencies: {},
-        selected: false
+        selected: false,
+        sortingScore: 2.1
       };
-      newCardsContainer = [...newCardsContainer, capPatch, c];
-    } else {
-      newCardsContainer.push(c);
+      exportedDependencies = [...exportedDependencies, capPatch];
     }
-    return newCardsContainer;
+    return exportedDependencies;
   }
 
   return (
