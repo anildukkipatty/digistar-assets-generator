@@ -194,6 +194,21 @@ function App() {
       c.fileName.indexOf('poncho') >= 0 || c.fileName.indexOf('vest') >= 0) && c.fileName.indexOf('patch') < 0
     })
   }
+  function createRuleSheet() {
+    const existingRules = JSON.parse(fs.readFileSync('rules.json'));
+    const rules = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
+    .filter((c: Card) => {
+      if (!c.dependencies.compulsory) return false;
+      return c.dependencies.compulsory.length > 0
+    })
+    .reduce((res: any, cur: Card) => {
+      if (! res) res = existingRules;
+      res[cur.fileName] = cur.dependencies.compulsory;
+      return res;
+    }, {})
+    fs.writeFileSync('rules.json', JSON.stringify(rules));
+    alert('yay');
+  }
   async function express() {
     const pathObj = await dialog.showOpenDialog({
       properties: ['openDirectory', 'multiSelections']
@@ -250,6 +265,7 @@ function App() {
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => generateMetaData()}>Generate metaData</button>
           <button style={{cursor: 'pointer'}} onClick={_ => quickGenerateRules()}>Quick generate rules</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => createRuleSheet()}>create rulesheet</button>
           <input placeholder="Bulk update sorting score" type="number" onKeyPress={e => updateBulkSortingScore(e)} />
         </>
       )
