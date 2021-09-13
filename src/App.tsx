@@ -233,7 +233,7 @@ function App() {
       return res;
     }, existingRules)
     fs.writeFileSync('rules.json', JSON.stringify(rules));
-    alert('yay');
+    alert('written to file');
   }
   function capPatches() {
     const defaultBackground = data.filter(c => c.folder === 'backgrounds')[0];
@@ -248,7 +248,7 @@ function App() {
       return c;
     })
     fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(newData));
-    alert('yay');
+    alert('Written to file');
   }
   function removeCapPatches() {
     const selectedCapNames = data.filter(c => c.selected === true).filter(c => c.folder === 'caps').map(c => c.fileName);
@@ -260,7 +260,7 @@ function App() {
         return c;
       });
     fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(newData));
-    alert('Done');
+    alert('Written to file');
   }
   async function express() {
     const pathObj = await dialog.showOpenDialog({
