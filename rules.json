@@ -1,1 +1,184 @@
-{"aloha.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"bucci.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"bumble bee.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6},{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/Bumble Bee Patch.png","fileName":"Bumble Bee Patch.png","sortingScore":1.5}],"buzzer beater.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"gilet vest.png":[{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6},{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/vest patch.png","fileName":"vest patch.png","sortingScore":1.5}],"greased lightning.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"l.l. black to the future hoodie.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"l.l. green goblin hoodie.png":[{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"l.l. olive bomber.png":[{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6},{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/Bomber Patch.png","fileName":"Bomber Patch.png","sortingScore":1.5}],"l.l. periwinkle blue hoodie.png":[{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6}],"off piste.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6},{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/Off Piste patch.png","fileName":"Off Piste patch.png","sortingScore":1.5}],"rogue.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/Rogue patch.png","fileName":"Rogue patch.png","sortingScore":1.5}],"the count.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/The Count back.png","fileName":"The Count back.png","sortingScore":1.5}],"l.l. black bomber.png":[{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":1.6},{"folder":"jackets","fileLink":"./nftImages/Abidal/jackets/Bomber Patch.png","fileName":"Bomber Patch.png","sortingScore":1.5}],"l.l. sky hoodie.png":[{"folder":"jackets","fileLink":"./nftImages/Gundogan/jackets/L.L. White Tee.png","fileName":"L.L. White Tee.png","sortingScore":3}]}
+{
+  "aloha.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "bucci.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "bumble bee.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/Bumble Bee Patch.png",
+      "fileName": "Bumble Bee Patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "buzzer beater.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "gilet vest.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/vest patch.png",
+      "fileName": "vest patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "greased lightning.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "l.l. black to the future hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "L.L. Gray Day Hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "L.L. Green Bean Hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "L.L. Red Hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "l.l. green goblin hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "l.l. olive bomber.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/Bomber Patch.png",
+      "fileName": "Bomber Patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "l.l. periwinkle blue hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "L.L. Orange Hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    }
+  ],
+  "off piste.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/Off Piste patch.png",
+      "fileName": "Off Piste patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "rogue.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/Rogue patch.png",
+      "fileName": "Rogue patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "the count.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/The Count back.png",
+      "fileName": "The Count back.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "l.l. black bomber.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/Bomber Patch.png",
+      "fileName": "Bomber Patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "l.l. sky hoodie.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 3
+    }
+  ]
+}
