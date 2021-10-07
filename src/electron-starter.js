@@ -12,6 +12,7 @@ const path = require('path');
 const url = require('url');
 const Jimp = require('jimp');
 const { ipcMain } = require('electron');
+const composeImages = require('../compose');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -49,53 +50,40 @@ function createWindow() {
 }
 
 electron.ipcMain.on('jimp-concat', async (event, arg) => {
-	let data;
-	try {
-		data = JSON.parse(fs.readFileSync('composer.json').toString());
-		for await (filesList of data.files) {
-			const bgLayer = await whiteJimpImg(2140, 2140);
-			const res = await composeImageFromFiles(filesList, bgLayer, data.generatedPath);
-			await res.img.writeAsync(res.fileLink);
-			console.log(`Completed image: ${res.fileName}`);
-			mainWindow.webContents.send('jimp-reply', res.fileLink);
-		}
-
-	} catch (error) {
-		throw new Error('Error reading from composer.json');
-	}
+	composeImages();
 		
 })
-async function composeImageFromFiles(fileArr, bgLayer, outputPath) {
-  if (fileArr.length <= 0) return;
-			let img = Object.create(bgLayer);
-			for await (file of fileArr) {
-				const newImg = await Jimp.read(file);
-				if (!img) {
-					img = newImg;
-					continue;
-				}
-				img = await img.composite(newImg, 0, 0);
-			}
-			let name = getComposedFileName(fileArr);
-			return {
-				fileLink: `${outputPath}/${name}.png`,
-				fileName: name,
-				img: img
-			}
-}
-async function whiteJimpImg(width, height) {
-	return new Promise((resolve, reject) => {
-		new Jimp(width, height, '#ffffff', (err, bgImg) => {
-			if (err) return reject(err);
-			resolve(bgImg);
-		});
-	});
-}
-function getComposedFileName(filesList) {
-	return filesList.map(filePath => {
-		return filePath.split('/')[filePath.split('/').length - 1].split('.')[0];
-	}).join('_');
-}
+// async function composeImageFromFiles(fileArr, bgLayer, outputPath) {
+//   if (fileArr.length <= 0) return;
+// 			let img = Object.create(bgLayer);
+// 			for await (file of fileArr) {
+// 				const newImg = await Jimp.read(file);
+// 				if (!img) {
+// 					img = newImg;
+// 					continue;
+// 				}
+// 				img = await img.composite(newImg, 0, 0);
+// 			}
+// 			let name = getComposedFileName(fileArr);
+// 			return {
+// 				fileLink: `${outputPath}/${name}.png`,
+// 				fileName: name,
+// 				img: img
+// 			}
+// }
+// async function whiteJimpImg(width, height) {
+// 	return new Promise((resolve, reject) => {
+// 		new Jimp(width, height, '#ffffff', (err, bgImg) => {
+// 			if (err) return reject(err);
+// 			resolve(bgImg);
+// 		});
+// 	});
+// }
+// function getComposedFileName(filesList) {
+// 	return filesList.map(filePath => {
+// 		return filePath.split('/')[filePath.split('/').length - 1].split('.')[0];
+// 	}).join('_');
+// }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
