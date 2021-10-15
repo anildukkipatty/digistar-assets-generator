@@ -53,7 +53,7 @@ interface CardLike {
   sortingScore?: number;
 }
 const folderNames = [
-  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
+  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps', 'masks'
 ] as const;
 const WINDOWS = 'win32';
 const MACOS = 'darwin';
@@ -121,7 +121,7 @@ function App() {
 
   function getCardOrderVal(card: Card): number {
     const scoreDict: {[Property in FolderNames]: number} = {
-      backgrounds: 1, jackets: 3, heads: 2, chains: 4, glasses: 5, caps: 6
+      backgrounds: 1, jackets: 3, heads: 2, chains: 4, masks: 4.5, glasses: 5, caps: 6
     };
     return card.sortingScore ? card.sortingScore : scoreDict[card.folder as FolderNames];
   };
