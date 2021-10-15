@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const playerName = 'Dahoud';
+const playerName = 'Lingz';
 
 fs.readdirSync(`./nftImages/${playerName}/cap patches`)
 .forEach(x => {
