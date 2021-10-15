@@ -1,8 +1,7 @@
 const fs = require('fs');
 const Jimp = require('jimp');
 
-compose();
-module.exports = async function compose() {
+async function compose() {
 	let data;
 	try {
 		data = JSON.parse(fs.readFileSync('composer.json').toString());
@@ -71,3 +70,7 @@ function getComposedFileName(filesList) {
 		return filePath.split('/')[filePath.split('/').length - 1].split('.')[0];
 	}).join('_');
 }
+
+compose();
+
+module.exports = compose;
