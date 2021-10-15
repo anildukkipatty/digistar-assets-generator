@@ -2,7 +2,7 @@ const fs = require('fs');
 const Jimp = require('jimp');
 
 compose();
-async function compose() {
+module.exports = async function compose() {
 	let data;
 	try {
 		data = JSON.parse(fs.readFileSync('composer.json').toString());
