@@ -23,7 +23,7 @@
       "sortingScore": 1.6
     }
   ],
-  "Burberry.png": [
+  "burberry.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -45,7 +45,7 @@
       "sortingScore": 1.5
     }
   ],
-  "ETH Maximus.png": [
+  "eth maximus.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/ETH Maximus patch.png",
@@ -75,7 +75,7 @@
       "sortingScore": 1.5
     }
   ],
-  "Flak.png": [
+  "flak.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
@@ -97,7 +97,7 @@
       "sortingScore": 1.6
     }
   ],
-  "Gamer black.png": [
+  "gamer black.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -105,7 +105,7 @@
       "sortingScore": 1.6
     }
   ],
-  "Gamer blue.png": [
+  "gamer blue.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -113,7 +113,7 @@
       "sortingScore": 1.6
     }
   ],
-  "Gamer grey.png": [
+  "gamer grey.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -121,7 +121,7 @@
       "sortingScore": 1.6
     }
   ],
-  "Gamer.png": [
+  "gamer.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -137,7 +137,7 @@
       "sortingScore": 1.6
     }
   ],
-  "L.L. Gray Day Hoodie.png": [
+  "l.l. Gray Day Hoodie.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -145,7 +145,7 @@
       "sortingScore": 1.6
     }
   ],
-  "L.L. Green Bean Hoodie.png": [
+  "l.l. Green Bean Hoodie.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -153,7 +153,7 @@
       "sortingScore": 1.6
     }
   ],
-  "L.L. Red Hoodie.png": [
+  "l.l. Red Hoodie.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
@@ -170,6 +170,20 @@
     }
   ],
   "l.l. olive bomber.png": [
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/Bomber Patch.png",
+      "fileName": "Bomber Patch.png",
+      "sortingScore": 1.5
+    }
+  ],
+  "l.l. white bomber.png": [
     {
       "folder": "jackets",
       "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",

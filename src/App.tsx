@@ -195,7 +195,11 @@ function App() {
     })
   }
   function applyRuleSheet() {
-    const existingRules = JSON.parse(fs.readFileSync('rules.json'));
+    let tempExistingRules = JSON.parse(fs.readFileSync('rules.json'));
+    let existingRules: any = {};
+    Object.keys(tempExistingRules).forEach(k => {
+      existingRules[k.toLowerCase()] = tempExistingRules[k];
+    });
     const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
     .map((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
