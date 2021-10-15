@@ -27,7 +27,7 @@ export type TempSortingScore = {
 }
 
 export const folderNames = [
-  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps'
+  'backgrounds', 'jackets', 'heads', 'chains', 'glasses', 'caps', 'masks'
 ] as const;
 
 export function filterJunkFiles(name: string): boolean {
@@ -104,6 +104,7 @@ export class FSCardLoader {
             } catch (error) {
               console.log(fileLink);
               console.log(this.path);
+              console.log(pc);
               
               throw error
             }
