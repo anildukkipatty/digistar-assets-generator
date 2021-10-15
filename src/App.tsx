@@ -218,7 +218,7 @@ function App() {
       return (c.fileName.toLocaleLowerCase().indexOf('patch') < 0 && c.fileName.toLocaleLowerCase().indexOf('back.png') < 0)
     });
     fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(cards));
-    alert('yay');
+    alert('Written to file');
   }
   function createRuleSheet() {
     const existingRules = JSON.parse(fs.readFileSync('rules.json'));
@@ -233,7 +233,7 @@ function App() {
       return res;
     }, existingRules)
     fs.writeFileSync('rules.json', JSON.stringify(rules));
-    alert('written to file');
+    alert('Written to file');
   }
   function capPatches() {
     const defaultBackground = data.filter(c => c.folder === 'backgrounds')[0];
