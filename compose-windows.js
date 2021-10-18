@@ -71,6 +71,4 @@ function getComposedFileName(filesList) {
 	}).join('_');
 }
 
-compose();
-
 module.exports = compose;

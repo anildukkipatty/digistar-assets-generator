@@ -12,7 +12,7 @@ const path = require('path');
 const url = require('url');
 const Jimp = require('jimp');
 const { ipcMain } = require('electron');
-const composeImages = require('../compose');
+const composeImages = require('../compose-windows');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
