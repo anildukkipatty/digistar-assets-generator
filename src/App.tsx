@@ -234,7 +234,7 @@ function App() {
     const noOfImages = 250;
     const imageContainerList: Card[][] = new Array(noOfImages);
     
-    await prefillWithRepeats(imageContainerList);
+    await prefillWithRepeats(imageContainerList, noOfImages);
 
     for(let i = 0; i < noOfImages; i++) {
       const foldersToFillFrom: string[] = folderNames as unknown as string[];
@@ -291,12 +291,13 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
-  async function prefillWithRepeats(imageContainerList: Card[][]) {
+  async function prefillWithRepeats(imageContainerList: Card[][], numberOfImages: number) {
     folderNames.forEach(folder => {
       const filesWithRepeat = data.filter(c => c.folder === folder && c.repeat && c.repeat > 0);
       const usedIndexes: number[] = [];
       filesWithRepeat.forEach(c => {
         if (!c.repeat) return;
+        if (usedIndexes.length >= numberOfImages) return;
         for(let ii = 0; ii < c.repeat; ii++) {
           let randomIndex = getRandomNumber(imageContainerList.length - 1);
           while (usedIndexes.indexOf(randomIndex) >= 0) {
