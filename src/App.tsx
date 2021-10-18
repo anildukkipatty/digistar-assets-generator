@@ -231,7 +231,7 @@ function App() {
     });
   }
   async function randomGenerate() {
-    const noOfImages = 250;
+    const noOfImages = 350;
     const imageContainerList: Card[][] = new Array(noOfImages);
     
     await prefillWithRepeats(imageContainerList, noOfImages);
