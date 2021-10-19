@@ -237,7 +237,14 @@ function App() {
     await prefillWithRepeats(imageContainerList, noOfImages);
 
     for(let i = 0; i < noOfImages; i++) {
-      const foldersToFillFrom: string[] = folderNames as unknown as string[];
+      const foldersToFillFrom: string[] = (folderNames as unknown as string[]).filter(folderName => {
+        let image = imageContainerList[i];
+        if (!image) return true;
+        return image.map(x => x.folder).indexOf(folderName) < 0;
+      });
+      console.log(foldersToFillFrom);
+      
+
       foldersToFillFrom.forEach(folderName => {
         const card = getRandomItem(folderName);
           if (imageContainerList[i] === undefined) imageContainerList[i] = [];
