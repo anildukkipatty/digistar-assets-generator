@@ -232,25 +232,24 @@ function App() {
   }
   async function randomGenerate() {
     const noOfImages = 350;
-    const imageContainerList: Card[][] = new Array(noOfImages);
+    const imageList: Card[][] = new Array(noOfImages);
     
-    await prefillWithRepeats(imageContainerList, noOfImages);
+    await prefillWithRepeats(imageList);
 
     for(let i = 0; i < noOfImages; i++) {
       const foldersToFillFrom: string[] = (folderNames as unknown as string[]).filter(folderName => {
-        let image = imageContainerList[i];
+        let image = imageList[i];
         if (!image) return true;
         return image.map(x => x.folder).indexOf(folderName) < 0;
       });
-      console.log(foldersToFillFrom);
+      // console.log(foldersToFillFrom);
       
-
       foldersToFillFrom.forEach(folderName => {
         const card = getRandomItem(folderName);
-          if (imageContainerList[i] === undefined) imageContainerList[i] = [];
+          if (imageList[i] === undefined) imageList[i] = [];
           
           if (card !== undefined){
-            imageContainerList[i].push(card);
+            imageList[i].push(card);
             if (folderName === 'backgrounds') {
             }
           }
@@ -259,12 +258,12 @@ function App() {
     
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
-      files: expandDependencies(imageContainerList)
+      files: expandDependencies(imageList)
         .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)))
         .map(cardsList => cardsList.map(c => c.fileLink))
     });
     fs.writeFileSync('./composer.json', res);
-    setNoOfCombinations(imageContainerList.length)
+    setNoOfCombinations(imageList.length)
     setShowWIP(true);
     if (os.platform() === WINDOWS) {
       ipcRenderer.send('jimp-concat', 'ping');
@@ -298,26 +297,51 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
-  async function prefillWithRepeats(imageContainerList: Card[][], numberOfImages: number) {
+  async function prefillWithRepeats(imageList: Card[][]) {
     folderNames.forEach(folder => {
+      let availableIds = fetchAvailableIds(imageList, folder);
       const filesWithRepeat = data.filter(c => c.folder === folder && c.repeat && c.repeat > 0);
-      const usedIndexes: number[] = [];
+      
       filesWithRepeat.forEach(c => {
         if (!c.repeat) return;
-        if (usedIndexes.length >= numberOfImages) return;
         for(let ii = 0; ii < c.repeat; ii++) {
-          let randomIndex = getRandomNumber(imageContainerList.length - 1);
-          while (usedIndexes.indexOf(randomIndex) >= 0) {
-            randomIndex = getRandomNumber(imageContainerList.length - 1);
+          if (availableIds.length <= 0) {
+            console.log('All slots are filled');
+            
+            return
+          };
+          
+          let randomIndex = getRandomNumber(availableIds.length - 1);
+          let indexToUse = availableIds[randomIndex];
+          if (!imageList[indexToUse]) {
+            imageList[indexToUse] = [];
           }
-          usedIndexes.push(randomIndex);
-          if (!imageContainerList[randomIndex]) {
-            imageContainerList[randomIndex] = [];
-          }
-          imageContainerList[randomIndex].push(c);
+          imageList[indexToUse].push(c);
+          console.log('Slot filled');
+          
+          availableIds = availableIds.slice(0, randomIndex).concat(availableIds.slice(randomIndex+1, availableIds.length));
         }
       });
     });
+
+    function fetchAvailableIds(imageList: Card[][], folder: string) {
+      const res = [];
+      try {
+        for(let i = 0; i < imageList.length; i++) {
+          if (imageList[i] === undefined) {
+            res.push(i);
+            continue;
+          };
+          if (imageList[i].filter(c => c.folder === folder).length <= 0)
+            res.push(i);
+        }
+        
+      } catch (error) {
+        console.log(imageList);
+        throw error;
+      }
+      return res;
+    }
   }
   function getRandomItem(folderName: string) {
     const itemsCount = data
@@ -327,7 +351,7 @@ function App() {
     const randomIndex = getRandomNumber(itemsCount);
     const item = data
       .filter(c => c.folder === folderName)
-      .filter(c => !(c.repeat && c.repeat > 0))[randomIndex];
+      .filter(c => !(c.repeat && c.repeat >= 0))[randomIndex];
     if (item === undefined) {
       
       if (folderName === 'heads') {
