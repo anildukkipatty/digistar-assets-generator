@@ -388,13 +388,13 @@ function App() {
     if (item === undefined) {
       
       if (folderName === 'heads') {
-        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat >= 0))[randomIndex - 1];
       }
       if (folderName === 'jackets') {
-        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat >= 0))[randomIndex - 1];
       }
       if (folderName === 'backgrounds') {
-        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat > 0))[randomIndex - 1];
+        return data.filter(c => c.folder === folderName).filter(c => !(c.repeat && c.repeat >= 0))[randomIndex - 1];
       }
     }
     return item;
