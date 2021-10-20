@@ -379,7 +379,7 @@ function App() {
   function getRandomItem(folderName: string) {
     const itemsCount = data
       .filter(c => c.folder === folderName)
-      .filter(c => !(c.repeat && c.repeat > 0))
+      .filter(c => !(c.repeat && c.repeat >= 0))
       .length;
     const randomIndex = getRandomNumber(itemsCount);
     const item = data
