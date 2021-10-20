@@ -239,11 +239,11 @@ function App() {
       .map((line: string) => line.split(',')
         .map(token => token.trim())
       )
-      .map((obj: string[]) => ({folder: obj[0], fileName: obj[1], repeat: parseInt(obj[2])}))
+      .map((obj: string[]) => ({folder: obj[0].toLowerCase(), fileName: obj[1].toLowerCase(), repeat: parseInt(obj[2])}))
 
       setData((data: Card[]) => {
         data.map(c => {
-          const r = rarity.filter((o: any) => o.folder === c.folder && o.fileName === c.fileName)[0]
+          const r = rarity.filter((o: any) => o.folder === c.folder.toLowerCase() && o.fileName === c.fileName.toLowerCase())[0]
           if (r !== undefined && r.repeat !== 0) {
             c.selected = true;
             c.repeat = r.repeat;
