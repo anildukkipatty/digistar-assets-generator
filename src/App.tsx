@@ -230,6 +230,39 @@ function App() {
         _setOutput((x) => `${x} \n ${code}`);
     });
   }
+  async function autoSetRarity() {
+    let rarity: any = [];
+    try {
+      rarity = fs.readFileSync(`${readBaseURI}/rarity.csv`)
+      .toString('ascii')
+      .split('\n')
+      .map((line: string) => line.split(',')
+        .map(token => token.trim())
+      )
+      .map((obj: string[]) => ({folder: obj[0], fileName: obj[1], repeat: parseInt(obj[2])}))
+
+      setData((data: Card[]) => {
+        data.map(c => {
+          const r = rarity.filter((o: any) => o.folder === c.folder && o.fileName === c.fileName)[0]
+          if (r !== undefined && r.repeat !== 0) {
+            c.selected = true;
+            c.repeat = r.repeat;
+            console.log(r.repeat);
+          }
+          return c;
+        })
+        return data;
+      });
+      setTimeout(() => {
+        setP(new Date().getTime());
+      }, 500);
+    } catch (error) {
+      alert('Rarity file not found.');
+      console.error(error);
+      
+      return;
+    }
+  }
   async function randomGenerate() {
     const noOfImages = 350;
     const imageList: Card[][] = new Array(noOfImages);
@@ -470,6 +503,7 @@ function App() {
         <>
           <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
           <button style={{cursor: 'pointer'}} onClick={_ => randomGenerate()}>Random generate</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => autoSetRarity()}>Auto-set Rarity</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
         </>
       )
@@ -484,7 +518,7 @@ function App() {
                 return (
                   <div key={i} onClick={_ => imageSelected(obj)} style={{...imgStyleDiv}}>
                     <span>{obj.selected ? `SELECTED` : ''}</span>
-                    {obj.selected ? <input onChange={e => obj.repeat = parseInt(e.target.value)} onClick={e => {e.stopPropagation();}} /> : ''}
+                    {obj.selected ? <input placeholder={obj.repeat+''}  onChange={e => obj.repeat = parseInt(e.target.value)} onClick={e => {e.stopPropagation();}} /> : ''}
                     <img style={imgStyle} alt="" src={obj.imgB64} />
                   </div>
                 )
