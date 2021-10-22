@@ -472,10 +472,14 @@ function App() {
 
     const statsObj = jsonFileNames.map((name: string) => JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/${name}`)))
       .map((obj: any) => obj.attributes)
-      .reduce((res: any, img: string[]) => {
+      .reduce((res: any, img: any[]) => {
         if (!res) res = {};
+        const jacketsCount = img.filter((layer: any) => Object.keys(layer)[0] === 'jackets').length;
         img.forEach((attr: any) => {
-          let fileName = attr[Object.keys(attr)[0]];
+          let fileName: string = attr[Object.keys(attr)[0]];
+          if (jacketsCount >= 2 && fileName.toLowerCase().indexOf(' tee') >= 0) {
+            return;
+          }
           if (Object.keys(attr)[0].indexOf('cap patches') >= 0) {
             fileName += ' cap patch';
           }
@@ -484,9 +488,9 @@ function App() {
         })
         return res;
       }, {});
-    const csvObj: any[][] = [['asset name', 'percentage']];
+    const csvObj: any[][] = [['asset name', 'count', 'percentage']];
     Object.keys(statsObj).forEach((keyName: string) => {
-      csvObj.push([keyName, (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
+      csvObj.push([keyName, statsObj[keyName], (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
     });
     const csvString = csvObj.map(o => o.join(',')).join('\n');
     fs.writeFileSync(`${readBaseURI}/outputs/stats.csv`, csvString);
