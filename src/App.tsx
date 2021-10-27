@@ -461,6 +461,10 @@ function App() {
       };
       exportedDependencies = [...exportedDependencies, capPatch];
     }
+    const compulsoryDependencies = c.dependencies.compulsory;
+    if (compulsoryDependencies && compulsoryDependencies.length > 0) {
+      exportedDependencies = [...exportedDependencies, ...compulsoryDependencies.map(c => c as Card)];
+    }
     return exportedDependencies;
   }
   function generateStats() {
