@@ -24,7 +24,7 @@ const tees = [
   '59.png', '73.png'
 ];
 const bombers = ["64.png", "65.png", "66.png"];
-const patches = ["31.png", "33.png", "39.png", "42.png", "44.png", "50.png", "71.png", "74.png"];
+const patches = ["31.png", "33.png", "39.png", "42.png", "44.png", "50.png", "71.png", "74.png", "102.png"];
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
