@@ -251,8 +251,8 @@ function App() {
     Object.keys(tempExistingRules).forEach(k => {
       existingRules[k.toLowerCase()] = tempExistingRules[k];
     });
-    // remove patches
     const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
+    // existing rules
     .map((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
       if (Object.keys(existingRules).indexOf(lowerCaseFileName) >= 0) {
@@ -264,6 +264,7 @@ function App() {
       }
       return c;
     })
+    // adding tees & bomber patches
     .map((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
       const whiteTeeObj = data.filter((c: Card) => {
@@ -273,15 +274,24 @@ function App() {
         return c.fileName.toLowerCase() === bomberPatch;
       })[0];
       whiteTeeObj.sortingScore = 1.6;
+      delete whiteTeeObj.imgB64;
       bomberPatchObj.sortingScore = 1.5;
+      delete bomberPatchObj.imgB64;
       if (jacketsNeedingTee.indexOf(lowerCaseFileName) >= 0) {
+        if (!c.dependencies.compulsory) {
+          c.dependencies.compulsory = [];
+        }
         c.dependencies.compulsory?.push(whiteTeeObj)
       }
       if (bombers.indexOf(lowerCaseFileName) >= 0) {
+        if (!c.dependencies.compulsory) {
+          c.dependencies.compulsory = [];
+        }
         c.dependencies.compulsory?.push(bomberPatchObj);
       }
       return c;
     })
+    // tee sorting score
     .map((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
       if (tees.indexOf(lowerCaseFileName) >= 0) {
@@ -289,6 +299,7 @@ function App() {
       }
       return c;
     })
+    // removing patches
     .filter((c: Card) => {
       const lowerCaseFileName = c.fileName.toLowerCase();
       return (patches.indexOf(lowerCaseFileName) < 0)
