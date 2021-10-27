@@ -31,19 +31,25 @@
       "sortingScore": 1.6
     }
   ],
-  "34.png": [
+  "bumble bee.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Gundogan/jackets/33.png",
-      "fileName": "33.png",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/Bumble Bee Patch.png",
+      "fileName": "Bumble Bee Patch.png",
       "sortingScore": 1.5
     }
   ],
-  "43.png": [
+  "eth maximus.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Gundogan/jackets/42.png",
-      "fileName": "42.png",
+      "fileLink": "./nftImages/Gundogan/jackets/ETH Maximus patch.png",
+      "fileName": "ETH Maximus patch.png",
       "sortingScore": 1.5
     }
   ],
@@ -55,19 +61,31 @@
       "sortingScore": 1.6
     }
   ],
-  "51.png": [
+  "gilet vest.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Abidal/jackets/50.png",
-      "fileName": "50.png",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/vest patch.png",
+      "fileName": "vest patch.png",
       "sortingScore": 1.5
     }
   ],
-  "45.png": [
+  "flak.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Abidal/jackets/44.png",
-      "fileName": "44.png",
+      "fileLink": "./nftImages/Abidal/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Abidal/jackets/flak patch.png",
+      "fileName": "flak patch.png",
       "sortingScore": 1.5
     }
   ],
@@ -251,27 +269,33 @@
       "sortingScore": 1.6
     }
   ],
-  "72.png": [
+  "off piste.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Gundogan/jackets/71.png",
-      "fileName": "71.png",
+      "fileLink": "./nftImages/Gundogan/jackets/L.L. White Tee.png",
+      "fileName": "L.L. White Tee.png",
+      "sortingScore": 1.6
+    },
+    {
+      "folder": "jackets",
+      "fileLink": "./nftImages/Gundogan/jackets/Off Piste patch.png",
+      "fileName": "Off Piste patch.png",
       "sortingScore": 1.5
     }
   ],
-  "75.png": [
+  "rogue.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Gundogan/jackets/74.png",
-      "fileName": "74.png",
+      "fileLink": "./nftImages/Gundogan/jackets/Rogue patch.png",
+      "fileName": "Rogue patch.png",
       "sortingScore": 1.5
     }
   ],
-  "40.png": [
+  "the count.png": [
     {
       "folder": "jackets",
-      "fileLink": "./nftImages/Gundogan/jackets/39.png",
-      "fileName": "39.png",
+      "fileLink": "./nftImages/Gundogan/jackets/The Count back.png",
+      "fileName": "The Count back.png",
       "sortingScore": 1.5
     }
   ],

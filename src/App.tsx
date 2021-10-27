@@ -5,6 +5,27 @@ const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
 
+const jacketsNeedingTee = [
+  '29.png', '30.png', '32.png',
+  '34.png', '36.png', '37.png',
+  '45.png', '46.png', '47.png',
+  '48.png', '49.png', '51.png',
+  '52.png', '60.png', '61.png',
+  '62.png', '63.png', '64.png',
+  '65.png', '66.png', '72.png',
+  '76.png', '77.png'
+];
+const whiteTee = "54.png";
+const bomberPatch = "31.png";
+const tees = [
+  '53.png', '54.png',
+  '55.png', '56.png',
+  '57.png', '58.png',
+  '59.png', '73.png'
+];
+const bombers = ["64.png", "65.png", "66.png"];
+const patches = ["31.png", "33.png", "39.png", "42.png", "44.png", "50.png", "71.png", "74.png"];
+
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
   let [showWIP, setShowWIP] = useState(false);
@@ -224,6 +245,57 @@ function App() {
     fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(cards));
     alert('Written to file');
   }
+  async function newRulesApply() {
+    let tempExistingRules = JSON.parse(fs.readFileSync('rules.json'));
+    let existingRules: any = {};
+    Object.keys(tempExistingRules).forEach(k => {
+      existingRules[k.toLowerCase()] = tempExistingRules[k];
+    });
+    // remove patches
+    const cards: Card[] = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
+    .map((c: Card) => {
+      const lowerCaseFileName = c.fileName.toLowerCase();
+      if (Object.keys(existingRules).indexOf(lowerCaseFileName) >= 0) {
+        c.dependencies.compulsory = existingRules[lowerCaseFileName]
+          .map((c: Card) => {
+            c.fileLink = new RelativePath(c.fileLink).getPath();
+            return c;
+          });
+      }
+      return c;
+    })
+    .map((c: Card) => {
+      const lowerCaseFileName = c.fileName.toLowerCase();
+      const whiteTeeObj = data.filter((c: Card) => {
+        return c.fileName.toLowerCase() === whiteTee;
+      })[0];
+      const bomberPatchObj = data.filter((c: Card) => {
+        return c.fileName.toLowerCase() === bomberPatch;
+      })[0];
+      whiteTeeObj.sortingScore = 1.6;
+      bomberPatchObj.sortingScore = 1.5;
+      if (jacketsNeedingTee.indexOf(lowerCaseFileName) >= 0) {
+        c.dependencies.compulsory?.push(whiteTeeObj)
+      }
+      if (bombers.indexOf(lowerCaseFileName) >= 0) {
+        c.dependencies.compulsory?.push(bomberPatchObj);
+      }
+      return c;
+    })
+    .map((c: Card) => {
+      const lowerCaseFileName = c.fileName.toLowerCase();
+      if (tees.indexOf(lowerCaseFileName) >= 0) {
+        c.sortingScore = 1.6;
+      }
+      return c;
+    })
+    .filter((c: Card) => {
+      const lowerCaseFileName = c.fileName.toLowerCase();
+      return (patches.indexOf(lowerCaseFileName) < 0)
+    })
+    fs.writeFileSync(`${readBaseURI}/meta-data.json`, JSON.stringify(cards));
+    alert('Written to file');
+  }
   function createRuleSheet() {
     const existingRules = JSON.parse(fs.readFileSync('rules.json'));
     const rules = JSON.parse(fs.readFileSync(`${readBaseURI}/meta-data.json`))
@@ -326,6 +398,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => applyRuleSheet()}>apply rulesheet</button>
           <button style={{cursor: 'pointer'}} onClick={_ => capPatches()}>cap patches</button>
           <button style={{cursor: 'pointer'}} onClick={_ => removeCapPatches()}>remove cap patches</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => newRulesApply()}>Numbered rules apply</button>
           <input placeholder="Bulk update sorting score" type="number" onKeyPress={e => updateBulkSortingScore(e)} />
         </>
       )
