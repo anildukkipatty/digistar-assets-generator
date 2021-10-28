@@ -68,6 +68,15 @@ class RelativePath {
     return this.path;
   }
 }
+const jacketsToGoOverChains = [
+  '30.png', '34.png', '36.png',
+  '45.png', '46.png', '47.png',
+  '48.png', '49.png', '51.png',
+  '52.png', '60.png', '61.png',
+  '62.png', '63.png', '64.png',
+  '65.png', '66.png', '72.png',
+  '76.png', '77.png'
+];
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
@@ -189,6 +198,22 @@ function App() {
         });
         return image;
       })
+      // changing chains sortingScore if its used with overcoat jackets
+      .map(cardsList => {
+        const overcoatJacket = cardsList
+        .filter((c: Card) => c.folder === 'jackets')
+        .filter((c: Card) => {
+          return jacketsToGoOverChains.indexOf(c.fileName.toLowerCase()) >= 0
+        })[0];
+        if (overcoatJacket) {
+          return cardsList.map((c: Card) => {
+            if (c.folder === 'chains')
+              c.sortingScore = 2.1;
+            return c;
+          })
+        }
+        return cardsList;
+      })
       .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)));
     
     const res = JSON.stringify({
@@ -292,6 +317,22 @@ function App() {
     const res = JSON.stringify({
       generatedPath: `${readBaseURI}/outputs`,
       files: expandDependencies(imageList)
+        // changing chains sortingScore if its used with overcoat jackets
+        .map(cardsList => {
+          const overcoatJacket = cardsList
+          .filter((c: Card) => c.folder === 'jackets')
+          .filter((c: Card) => {
+            return jacketsToGoOverChains.indexOf(c.fileName.toLowerCase()) >= 0
+          })[0];
+          if (overcoatJacket) {
+            return cardsList.map((c: Card) => {
+              if (c.folder === 'chains')
+                c.sortingScore = 2.1;
+              return c;
+            })
+          }
+          return cardsList;
+        })
         .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)))
         .map(cardsList => cardsList.map(c => c.fileLink))
     });
