@@ -77,6 +77,12 @@ const jacketsToGoOverChains = [
   '65.png', '66.png', '72.png',
   '76.png', '77.png'
 ];
+const tees = [
+  '53.png', '54.png',
+  '55.png', '56.png',
+  '57.png', '58.png',
+  '59.png', '73.png'
+];
 
 function App() {
   let [readBaseURI, setReadBaseURI] = useState<string | null>(null);
@@ -522,7 +528,7 @@ function App() {
         const jacketsCount = img.filter((layer: any) => Object.keys(layer)[0] === 'jackets').length;
         img.forEach((attr: any) => {
           let fileName: string = attr[Object.keys(attr)[0]];
-          if (jacketsCount >= 2 && fileName.toLowerCase().indexOf(' tee') >= 0) {
+          if (jacketsCount >= 2 && tees.indexOf(fileName.toLowerCase()) >= 0) {
             return;
           }
           if (Object.keys(attr)[0].indexOf('cap patches') >= 0) {
@@ -533,9 +539,23 @@ function App() {
         })
         return res;
       }, {});
+    
+    const namesDict = fs.readFileSync('nameDict.csv')
+      .toString('ascii')
+      .split('\n')
+      .map((line: string) => {
+        const splitLines = line.split(',');
+        return {oldName: splitLines[0], newName: splitLines[1].trim()};
+      })
+      .reduce((nameObj: any, cur: any) => {
+        if (! nameObj) nameObj = {};
+        nameObj[cur.oldName] = cur.newName;
+        return nameObj;
+      }, {});
+
     const csvObj: any[][] = [['asset name', 'count', 'percentage']];
     Object.keys(statsObj).forEach((keyName: string) => {
-      csvObj.push([keyName, statsObj[keyName], (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
+      csvObj.push([namesDict[keyName], statsObj[keyName], (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
     });
     const csvString = csvObj.map(o => o.join(',')).join('\n');
     fs.writeFileSync(`${readBaseURI}/outputs/stats.csv`, csvString);
