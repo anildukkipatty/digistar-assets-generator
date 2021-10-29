@@ -528,7 +528,7 @@ function App() {
         const jacketsCount = img.filter((layer: any) => Object.keys(layer)[0] === 'jackets').length;
         img.forEach((attr: any) => {
           let fileName: string = attr[Object.keys(attr)[0]];
-          if (jacketsCount >= 2 && tees.indexOf(fileName.toLowerCase()) >= 0) {
+          if (jacketsCount >= 2 && tees.indexOf(`${fileName}.png`.toLowerCase()) >= 0) {
             return;
           }
           if (Object.keys(attr)[0].indexOf('cap patches') >= 0) {
