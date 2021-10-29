@@ -294,6 +294,55 @@ function App() {
       return;
     }
   }
+  async function generateFromPresets() {
+    const presetFileNames = fs.readdirSync(`${readBaseURI}/presets`).filter((fname: String) => fname.indexOf('.json') >= 0);
+    const presetBasedImages = []
+    for (const fileName of presetFileNames) {
+      const image = JSON.parse(fs.readFileSync(`${readBaseURI}/presets/${fileName}`).toString('ascii'))
+        .attributes
+        .map((x: any) => {
+          return `${readBaseURI}/${Object.keys(x)[0]}/${x[Object.keys(x)[0]]}.png`
+        });
+
+      presetBasedImages.push(image);
+
+    }
+    const composerFile = {generatedPath: `${readBaseURI}/outputs`, files: presetBasedImages};
+    fs.writeFileSync(`./composer.json`, JSON.stringify(composerFile));
+    setNoOfCombinations(presetBasedImages.length)
+    setShowWIP(true);
+    if (os.platform() === WINDOWS) {
+      ipcRenderer.send('jimp-concat', 'ping');
+      return;
+    }
+    const python = spawn("./compose", [readBaseURI]);
+
+    python.stdout.on("data", (data: any) => {
+        console.log(`stdout: ${data}`);
+        _setOutput((x) => `${x} \n ${data.toString()}`);
+        setNoOfImagesGenerated(num => ++num);
+        try {
+          // setOutputImages(oldArr => [...oldArr, `data:image/png;base64, ${fs.readFileSync(data.toString().trim()).toString('base64')}`])
+        } catch (error) {
+          console.log('Error loading output file: ', data.toString());
+        }
+    });
+
+    python.stderr.on("data", (data: Buffer) => {
+        console.log(`stderr: ${data}`);
+        _setOutput(`${output} \n ${data.toString()}`);
+    });
+
+    python.on('error', (error: any) => {
+        console.log(`error: ${error.message}`);
+        _setOutput(`${output} \n ${error.message}`);
+    });
+
+    python.on("close", (code: unknown) => {
+        console.log(`child process exited with code ${code}`);
+        _setOutput((x) => `${x} \n ${code}`);
+    });
+  }
   async function randomGenerate() {
     const noOfImages = 350;
     const imageList: Card[][] = new Array(noOfImages);
@@ -573,6 +622,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => generateImages()}>Generate images</button>
           <button style={{cursor: 'pointer'}} onClick={_ => randomGenerate()}>Random generate</button>
           <button style={{cursor: 'pointer'}} onClick={_ => autoSetRarity()}>Auto-set Rarity</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => generateFromPresets()}>Generate from presets</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
         </>
       )
