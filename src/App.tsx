@@ -611,6 +611,9 @@ function App() {
 
     const csvObj: any[][] = [['asset name', 'count', 'percentage']];
     Object.keys(statsObj).forEach((keyName: string) => {
+      if (! namesDict[keyName]) {
+        console.log(keyName, 'undfined filename');
+      }
       csvObj.push([namesDict[keyName], statsObj[keyName], (statsObj[keyName] / jsonFileNames.length * 100).toFixed(2)]);
     });
     const csvString = csvObj.map(o => o.join(',')).join('\n');
