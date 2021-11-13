@@ -73,7 +73,7 @@ const jacketsToGoOverChains = [
   '45.png', '46.png', '47.png',
   '48.png', '49.png', '51.png',
   '52.png', '64.png', '65.png', '66.png', '72.png',
-  '76.png', '77.png'
+  '76.png', '77.png', '167.png'
 ];
 // const jacketsToGoOverChains = [
 //   '30.png', '34.png', '36.png',
