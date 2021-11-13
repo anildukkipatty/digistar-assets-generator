@@ -69,7 +69,7 @@ class RelativePath {
   }
 }
 const jacketsToGoOverChains = [
-  '34.png', '36.png',
+  '34.png', '36.png', '163.png', '164.png', '165.png',
   '45.png', '46.png', '47.png',
   '48.png', '49.png', '51.png',
   '52.png', '64.png', '65.png', '66.png', '72.png',
