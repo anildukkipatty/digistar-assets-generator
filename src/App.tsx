@@ -222,13 +222,13 @@ function App() {
           return cardsList.map((c: Card) => {
             if (c.folder === 'chains')
               c.sortingScore = 2.1;
-            return Object.create({}, c as any);
+            return Object.assign({}, c as any);
           })
         }
         return cardsList.map((c: Card) => {
           if (c.folder === 'chains')
             c.sortingScore = 4;
-          return Object.create({}, c as any);
+          return Object.assign({}, c as any);
         });
       })
       .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)));
@@ -394,13 +394,13 @@ function App() {
             return cardsList.map((c: Card) => {
               if (c.folder === 'chains')
                 c.sortingScore = 2.1;
-              return Object.create({}, c as any);
+              return Object.assign({}, c as any);
             })
           }
           return cardsList.map((c: Card) => {
             if (c.folder === 'chains')
               c.sortingScore = 4;
-            return Object.create({}, c as any);
+            return Object.assign({}, c as any);
           });
         })
         .map(cardsList => cardsList.sort((a, b) => getCardOrderVal(a) - getCardOrderVal(b)))
