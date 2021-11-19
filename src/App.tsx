@@ -628,6 +628,35 @@ function App() {
     fs.writeFileSync(`${readBaseURI}/outputs/stats.csv`, csvString);
     alert('Done');
   }
+  function runDedupe() {
+    interface ImageMetaData {
+      name: string;
+      attributes: any[];
+    }
+    const jsonFileNames = fs.readdirSync(readBaseURI+'/outputs')
+      .filter((name: string) => name.indexOf('.json') >= 0)
+
+    const dedupeMap = new Map();
+    const duplicateFileNamesSet = new Set;
+    jsonFileNames.map((name: string) => JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/${name}`)))
+    .forEach((obj: ImageMetaData) => {
+      const dedupeKey = obj.attributes
+      .map((attr: any) => attr[Object.keys(attr)[0]])
+      .sort()
+      .join(';');
+      if (dedupeMap.has(dedupeKey)) {
+        duplicateFileNamesSet.add(dedupeMap.get(dedupeKey));
+        duplicateFileNamesSet.add(obj.name);
+      }
+      dedupeMap.set(dedupeKey, obj.name);
+    })
+    if (duplicateFileNamesSet.size > 0) {
+      alert('Duplicates found and logged');
+      console.log(duplicateFileNamesSet.values());
+      return;
+    }
+    alert("No duplicates found");
+  }
 
   return (
     <>
@@ -642,6 +671,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => autoSetRarity()}>Auto-set Rarity</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateFromPresets()}>Generate from presets</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => runDedupe()}>Dedupe</button>
         </>
       )
       }
