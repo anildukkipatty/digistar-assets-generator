@@ -658,6 +658,23 @@ function App() {
     }
     alert("No duplicates found");
   }
+  function renameAllFiles() {
+    const seed = new Date().getTime();
+    const fileNames = fs.readdirSync(readBaseURI+'/outputs')
+      .filter((name: string) => name.indexOf('.json') >= 0)
+      .map((name: string) => name.split(".json")[0]);
+    
+    for(const fileName of fileNames) {
+      const newName = seed + new Date().getTime() + "";
+      const jsonObj = (JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/${fileName}.json`).toString('ascii')));
+      jsonObj.name = newName;
+      fs.writeFileSync(`${readBaseURI}/outputs/${fileName}.json`, JSON.stringify(jsonObj));
+      
+      fs.renameSync(`${readBaseURI}/outputs/${fileName}.png`, `${readBaseURI}/outputs/${newName}.png`);
+      fs.renameSync(`${readBaseURI}/outputs/${fileName}.json`, `${readBaseURI}/outputs/${newName}.json`);
+    }
+    alert('Done');
+  }
 
   return (
     <>
@@ -673,6 +690,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => generateFromPresets()}>Generate from presets</button>
           <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
           <button style={{cursor: 'pointer'}} onClick={_ => runDedupe()}>Dedupe</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => renameAllFiles()}>Rename All Files</button>
         </>
       )
       }
