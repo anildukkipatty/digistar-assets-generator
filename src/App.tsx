@@ -88,7 +88,8 @@ const tees = [
   '53.png', '54.png',
   '55.png', '56.png',
   '57.png', '58.png',
-  '59.png', '73.png'
+  '59.png', '73.png',
+  '28.png'
 ];
 
 function App() {
