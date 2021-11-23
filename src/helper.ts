@@ -40,7 +40,12 @@ async function run(fs: any, FOLDER_LOCATION: string, PLAYER: string) {
     metaDataFile.attributes.push({"trait_type": "Hero", "value": PLAYER});
     metaDataFile.attributes = calculateClassification(metaDataFile.attributes);
 
-    metaDataFile.attributes = metaDataFile.attributes.filter((attr: Attribute) => attr.value.indexOf(" patch") < 0)
+    try {
+      metaDataFile.attributes = metaDataFile.attributes.filter((attr: Attribute) => attr.value.indexOf(" patch") < 0)
+    } catch (error) {
+      console.log(`JSON file corrupted is: ${jsonFileName}`);
+      throw error;
+    }
 
     // if (isSpecialDrip) metaDataFile.attributes.push({"trait_type": "Shard Type", "value": "Special"});
     delete metaDataFile.fileLink;
