@@ -92,6 +92,7 @@ const assetNamesDict = {
   163: "Camo Shacket",
   164: "Denim Shacket",
   165: "LL Varsity Bomber Jacket",
+  166: "Roadman patch",
   167: "Roadman",
   80: "Yacht Life",
   81: "Avalanche",
