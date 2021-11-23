@@ -22,6 +22,7 @@ import './App.css';
 //   setData(dataObj);
 // });
 import { useEffect, useState } from 'react';
+import { run } from './helper';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
@@ -675,6 +676,20 @@ function App() {
     }
     alert('Done');
   }
+  function createNFTJSONFiles() {
+    const PLAYER = "Test Player";
+    alert(`Player name being used is: ${PLAYER}`);
+    try {
+      if (! fs.existsSync(`${readBaseURI}/outputs/ipfs`)) {
+        fs.mkdirSync(`${readBaseURI}/outputs/ipfs`);
+      }
+      run(fs, `${readBaseURI}/outputs`, PLAYER);
+      alert('Done');
+    } catch (error) {
+      alert('Error.. check logs');
+      console.error(error);
+    }
+  }
 
   return (
     <>
@@ -691,6 +706,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => generateStats()}>Stats</button>
           <button style={{cursor: 'pointer'}} onClick={_ => runDedupe()}>Dedupe</button>
           <button style={{cursor: 'pointer'}} onClick={_ => renameAllFiles()}>Rename All Files</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => createNFTJSONFiles()}>Create NFT JSON files</button>
         </>
       )
       }
