@@ -9,7 +9,7 @@ const tees = [
   '28'
 ];
 const otherworldlyClassificationParams = [
-  40, 43, 75, 78, 162,  136, 138, 139, 140, 141, 142, 143, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157 
+  40, 43, 75, 78, 162,  136, 137, 138, 139, 140, 141, 142, 143, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157 
 ];
 interface Attribute {
   trait_type: string;
@@ -38,6 +38,7 @@ async function run(fs: any, FOLDER_LOCATION: string, PLAYER: string) {
     metaDataFile.attributes = renameAttributes(metaDataFile.attributes);
     metaDataFile.attributes = removeExtraDrip(metaDataFile.attributes);
     metaDataFile.attributes.push({"trait_type": "Hero", "value": PLAYER});
+    metaDataFile.description = "This NFT belongs to the Ludo Labs Genesis Collection, the world's first C2E (Collect-To-Experience) game in which a collector's NFTs can be used to compete for unforgettable prizes and rewards directly from the world's top footballers. More details can be found at https://ludolabs.io or https://discord.gg/ludolabs";
     metaDataFile.attributes = calculateClassification(metaDataFile.attributes);
 
     try {
@@ -92,7 +93,7 @@ function calculateClassification(attributes: Attribute[]) {
     return attributes;
   }
   if (otherworldlyClassificationParams.map(n => (assetNamesDict as any)[n]).indexOf(drip.value) >=0 ) {
-    attributes.push({"trait_type": 'Classification', "value": "Otherworldly"});
+    attributes.push({"trait_type": 'Classification', "value": "Multiversal"});
     return attributes;
   }
   attributes.push({"trait_type": 'Classification', "value": "Aesthetic"});
