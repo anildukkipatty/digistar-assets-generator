@@ -677,7 +677,7 @@ function App() {
     alert('Done');
   }
   function createNFTJSONFiles() {
-    const PLAYER = "Test Player";
+    const PLAYER = "Eric Abidal";
     alert(`Player name being used is: ${PLAYER}`);
     try {
       if (! fs.existsSync(`${readBaseURI}/outputs/ipfs`)) {
