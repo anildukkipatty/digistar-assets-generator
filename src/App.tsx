@@ -690,6 +690,21 @@ function App() {
       console.error(error);
     }
   }
+  function orderNFTFiles() {
+    const jsonFileNames: string[] = fs.readdirSync(`${readBaseURI}/outputs`)
+      .filter((fileName: string) => fileName.indexOf('.json') >= 0)
+      .map((fileName: string) => fileName.split('.json')[0]);
+    
+    if (! fs.existsSync(`${readBaseURI}/outputs/orderedFiles`)) {
+      fs.mkdirSync(`${readBaseURI}/outputs/orderedFiles`);
+    }
+  
+    jsonFileNames.forEach((fileName: string, i: number) => {
+      fs.copyFileSync(`${readBaseURI}/outputs/${fileName}.json`, `${readBaseURI}/outputs/orderedFiles/${i}.json`);
+    });
+
+    alert('done');
+  }
 
   return (
     <>
@@ -707,6 +722,7 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => runDedupe()}>Dedupe</button>
           <button style={{cursor: 'pointer'}} onClick={_ => renameAllFiles()}>Rename All Files</button>
           <button style={{cursor: 'pointer'}} onClick={_ => createNFTJSONFiles()}>Create NFT JSON files</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => orderNFTFiles()}>Order NFT files</button>
         </>
       )
       }
