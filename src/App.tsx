@@ -23,6 +23,7 @@ import './App.css';
 // });
 import { useEffect, useState } from 'react';
 import { run } from './helper';
+import { shuffle } from './shuffle';
 const dialog = window.require('electron').remote.dialog;
 const ipcRenderer = window.require('electron').ipcRenderer;
 const fs = window.require('electron').remote.require('fs');
@@ -718,9 +719,10 @@ function App() {
     jsonFileNames.forEach((fileName: string) => {
       let NFTObj: NFT;
       try {
-        NFTObj = JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`).toString('ascii'));
+        NFTObj = JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`).toString());
         const drips = NFTObj.attributes.filter((attr: NFTAttribute) => attr.trait_type === 'Drip');
-        if (drips && drips.length > 1) {
+        const hats = NFTObj.attributes.filter((attr: NFTAttribute) => attr.trait_type === 'Hat');
+        if ((drips && drips.length > 1) || hats.length > 1) {
           // NFTObj.attributes = NFTObj.attributes.filter((attr: NFTAttribute) => {
           //   if (attr.value.toLowerCase().indexOf('patch') >= 0) return false;
           //   return true;
@@ -729,20 +731,64 @@ function App() {
           // counter.filesWithPatches += 1;
           // console.log(`${fileName}.json updated`);
           counter.filesWithPatches += 1;
-          console.log(`${fileName}.json`, drips);
+          console.log(`${fileName}.json`, drips, hats);
         }
       } catch (error) {
         console.log(`${fileName}.json has invalid JSON structure`);
-        counter.invalidJSONFile += 1;
-        // const updatedNFTString = fs.readFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`)
-        // .toString('ascii')
-        // .replaceAll("ć", "c");
-        // fs.writeFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`, updatedNFTString);
       }
     });
 
     console.log(counter);
     alert('done');
+  }
+  function renameCID() {
+    const newCID = 'QmRk37trKUtvk8SxrRNoomryA6JPwyHjYKzZqbCthbscwG';
+    type NFTAttribute = {trait_type: string, value: string};
+    interface NFT {
+      description: string; attributes: NFTAttribute[]; image: string;
+    }
+    const jsonFileNames: string[] = fs.readdirSync(`${readBaseURI}/outputs/orderedFiles`)
+      .filter((fileName: string) => fileName.indexOf('.json') >= 0)
+      .map((fileName: string) => fileName.split('.json')[0]);
+    // const counter = {invalidJSONFile: 0, filesWithPatches: 0};
+
+    jsonFileNames.forEach((fileName: string) => {
+      let NFTObj: NFT;
+      NFTObj = JSON.parse(fs.readFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`).toString());
+      let tokens = NFTObj.image.split(`//`);
+      let x1 = tokens[0];
+      let x2 = tokens[1].split('/')
+      let newImageURL = `${x1}//${newCID}/${x2[1]}`
+      NFTObj.image = newImageURL;
+      fs.writeFileSync(`${readBaseURI}/outputs/orderedFiles/${fileName}.json`, JSON.stringify(NFTObj));
+    });
+    alert('done');
+  }
+  async function shuffleNFTs() {
+    const SEED = 'anil';
+    alert('using seed ' + SEED);
+    const jsonFileNames: string[] = fs.readdirSync(`${readBaseURI}/outputs/orderedFiles`)
+      .filter((fileName: string) => fileName.indexOf('.json') >= 0);
+    let xx: string[] = [];
+    for (let i = 0; i < jsonFileNames.length; i++) {
+      xx.push(i+'');
+    }
+    shuffle(xx, SEED);
+    for (let i = 0; i < jsonFileNames.length; i++) {
+      await setDelay();
+      fs.renameSync(`${readBaseURI}/outputs/orderedFiles/${i}.json`, `${readBaseURI}/outputs/orderedFiles/${xx[i]}.json`)
+      console.log(`Shuffled ${i}.json to ${xx[i]}.json`);
+    }
+    // console.log(xx);
+    
+    alert('done');
+  }
+  async function setDelay() {
+    return await new Promise((res) => {
+      setTimeout(() => {
+        res(true);
+      }, 100);
+    });
   }
 
   return (
@@ -763,6 +809,8 @@ function App() {
           <button style={{cursor: 'pointer'}} onClick={_ => createNFTJSONFiles()}>Create NFT JSON files</button>
           <button style={{cursor: 'pointer'}} onClick={_ => orderNFTFiles()}>Order NFT files</button>
           <button style={{cursor: 'pointer'}} onClick={_ => validateNFTFiles()}>Validate NFT JSON files</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => renameCID()}>Rename IPFS CID</button>
+          <button style={{cursor: 'pointer'}} onClick={_ => shuffleNFTs()}>Shuffle NFTs</button>
         </>
       )
       }
